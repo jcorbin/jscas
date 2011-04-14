@@ -1,30 +1,3 @@
-// Lexer example:
-//   var lexer = new CAS.Lexer();
-//   lexer.addRecognizer(/-?\d+(?:\.\d+)?(?:E\d+)?/, "Number"),
-//   lexer.addRecognizer(/[()+\-*\/]/, "Symbol")
-//   lexer.addRecognizer(/\w+/, "Word"),
-//
-//   var tokens = lexer.parse("2 + (3 - 2) * x");
-//   tokens.all() == [
-//     ["2","Number"],
-//     ["+","Symbol"],
-//     ["(","Symbol"],
-//     ["3","Number"],
-//     ["-","Symbol"],
-//     ["2","Number"],
-//     [")","Symbol"],
-//     ["*","Symbol"],
-//     ["x","Word"]
-//   ]
-//
-//   tokens.reset()
-//
-//   tokens.token() == ["2","Number"]
-//   tokens.token() == ["+","Symbol"]
-//   ...
-//   tokens.token() == ["x","Word"]
-//   tokens.token() == null
-
 var CAS = (function() {
 
 var Lexer = function(grammar, input) {
