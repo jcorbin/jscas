@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>cas test</title>
+        <script src="cas.js" language="JavaScript"></script>
+    </head>
+    <body>
+        <input id="i" size="100" type="text" /><br />
+        <div id="m"></div>
+        <script language="JavaScript">
+            (function () {
+                var inp = document.getElementById("i");
+                var mess = document.getElementById("m");
+                var lexer = new CAS.Lexer();
+                lexer.addRecognizer(/-?\d+(?:\.\d+)?(?:E\d+)?/, "Number"),
+                lexer.addRecognizer(/[()+\-*\/]/, "Symbol")
+                lexer.addRecognizer(/\w+/, "Word"),
+                inp.addEventListener('keypress', function(e) {
+                    if (e.keyIdentifier != "Enter") return;
+                    mess.innerText = "Parsing...";
+                    var tokens = lexer.parse(inp.value);
+                    try {
+                        console.log(JSON.stringify(tokens.all()));
+                        mess.innerText = "Ready.";
+                    } catch(err) {
+                        switch (err.name) {
+                        case "CAS.ParseError":
+                            mess.innerText = "Error: " + err.message;
+                            inp.setSelectionRange(err.start, err.end+1);
+                            break;
+                        default:
+                            throw err;
+                        }
+                    }
+                });
+                mess.innerText = "Ready.";
+                inp.focus();
+            })();
+        </script>
+    </body>
+</html>
