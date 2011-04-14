@@ -12,14 +12,14 @@
             (function () {
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
-                var lexer = new CAS.Lexer();
-                lexer.addRecognizer(/-?\d+(?:\.\d+)?(?:E\d+)?/, "Number"),
-                lexer.addRecognizer(/[()+\-*\/]/, "Symbol")
-                lexer.addRecognizer(/\w+/, "Word"),
+                var grammar = new CAS.Grammar();
+                grammar.token("Number", /-?\d+(?:\.\d+)?(?:E\d+)?/),
+                grammar.token("Symbol", /[()+\-*\/]/)
+                grammar.token("Word", /\w+/),
                 inp.addEventListener('keypress', function(e) {
                     if (e.keyIdentifier != "Enter") return;
                     mess.innerText = "Parsing...";
-                    var tokens = lexer.parse(inp.value);
+                    var tokens = grammar.parse(inp.value);
                     try {
                         console.log(JSON.stringify(tokens.all()));
                         mess.innerText = "Ready.";

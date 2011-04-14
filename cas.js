@@ -27,13 +27,13 @@
 
 var CAS = (function() {
 
-var LexerParse = function(scanner, input) {
-    this.scan = scanner;
+var Lexer = function(grammar, input) {
+    this.grammar = grammar;
     this.input = input;
     this.reset();
 };
-LexerParse.prototype.emptyRe = /^\s*$/;
-LexerParse.prototype.reset = function() {
+Lexer.prototype.emptyRe = /^\s*$/;
+Lexer.prototype.reset = function() {
     this.working = this.input;
     this.position = 0;
     this.last = null;
@@ -42,7 +42,7 @@ LexerParse.prototype.reset = function() {
 // error(message, start)      // end = end of string
 // error(message)             // if last token, error about it, otherwise
 //                            // position to end of input
-LexerParse.prototype.error = function(message) {
+Lexer.prototype.error = function(message) {
     var start, end;
     if (arguments.length == 3) {
         start = arguments[1];
@@ -65,15 +65,15 @@ LexerParse.prototype.error = function(message) {
     throw err;
 ;
 };
-LexerParse.prototype.all = function() {
+Lexer.prototype.all = function() {
     var tokens = [], token = null;
     while (token = this.token())
         tokens.push(token);
     return tokens;
 };
-LexerParse.prototype.token = function() {
+Lexer.prototype.token = function() {
     if (! this.working) return null;
-    var match = this.scan(this.working);
+    var match = this.grammar.recognizeToken(this.working);
     if (! match) {
         if (! this.emptyRe.test(this.working))
             this.error("trailing garbage", this.position);
@@ -89,10 +89,10 @@ LexerParse.prototype.token = function() {
     return [match.token, match.tokenTypeData];
 };
 
-function Lexer(recognizers) {
-    this.recognizers = [];
+function Grammar() {
+    this.tokens = [];
 }
-Lexer.prototype.addRecognizer = function(regex, typeData) {
+Grammar.prototype.token = function(token, regex) {
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
             throw new Error("Invalid regex");
@@ -101,7 +101,7 @@ Lexer.prototype.addRecognizer = function(regex, typeData) {
     regex = "^\\s*(" + regex + ")";
     regex = new RegExp(regex);
 
-    this.recognizers.push(function(input) {
+    this.tokens.push(function(input) {
         var match = regex.exec(input);
         if (match) {
             match.token = match[1];
@@ -110,21 +110,17 @@ Lexer.prototype.addRecognizer = function(regex, typeData) {
         return match;
     });
 };
-Lexer.prototype.tokenMatcher = function(input) {
-    for (var i=0, l=this.recognizers; i<l.length; i++) {
-        var match = this.recognizers[i](input);
+Grammar.prototype.recognizeToken = function(input) {
+    for (var i=0, l=this.tokens; i<l.length; i++) {
+        var match = this.tokens[i](input);
         if (match) return match;
     }
     return null;
 ;
 };
-Lexer.prototype.parse = function(input) {
-    return new LexerParse(this.tokenMatcher.bind(this), input);
+Grammar.prototype.parse = function(input) {
+    return new Lexer(this, input);
 };
-
-function Grammar() {
-    this.lexer = new Lexer();
-}
 
 return {
     'Lexer': Lexer,
