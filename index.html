@@ -8,12 +8,22 @@
     </head>
     <body>
         <input id="i" size="100" type="text" /><br />
-        <div id="m"></div>
+        <div id="m">Loading...</div>
+        <ol id="res"></ol>
         <script language="JavaScript">
             (function () {
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
                 var grammar = new CAS.Grammar();
+                var results = document.getElementById("res");
+                function result(content) {
+                    if (typeof content == "string") {
+                        content = document.createTextNode(content);
+                        content = document.createElement("li").appendChild(content);
+                        content = content.parentNode;
+                    }
+                    results.insertBefore(content, results.firstChild);
+                }
                 grammar.token("Number", /-?\d+(?:\.\d+)?(?:E\d+)?/),
                 grammar.token("Symbol", /[()+\-*\/]/)
                 grammar.token("Word", /\w+/),
@@ -22,8 +32,8 @@
                     mess.innerText = "Parsing...";
                     var tokens = grammar.parse(inp.value);
                     try {
-                        console.log(JSON.stringify(tokens.all()));
-                        mess.innerText = "Ready.";
+                        result(JSON.stringify(tokens.all()));
+                        mess.innerText = "";
                     } catch(err) {
                         switch (err.name) {
                         case "CAS.ParseError":
@@ -35,7 +45,7 @@
                         }
                     }
                 });
-                mess.innerText = "Ready.";
+                mess.innerText = "";
                 inp.focus();
             })();
         </script>
