@@ -86,7 +86,7 @@ Lexer.prototype.token = function() {
     ];
     this.working = this.working.substr(match[0].length);
     this.position += match[0].length;
-    return [match.token, match.tokenTypeData];
+    return [match.token, match.value];
 };
 
 function Grammar() {
@@ -104,8 +104,8 @@ Grammar.prototype.token = function(token, regex) {
     this.tokens.push(function(input) {
         var match = regex.exec(input);
         if (match) {
-            match.token = match[1];
-            match.tokenTypeData = typeData;
+            match.token = token;
+            match.value = match[1];
         }
         return match;
     });
