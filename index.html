@@ -30,9 +30,8 @@
                 inp.addEventListener('keypress', function(e) {
                     if (e.keyIdentifier != "Enter") return;
                     mess.innerText = "Parsing...";
-                    var tokens = grammar.parse(inp.value);
                     try {
-                        result(JSON.stringify(tokens.all()));
+                        result(JSON.stringify(grammar.parse(inp.value)));
                         mess.innerText = "";
                     } catch(err) {
                         switch (err.name) {

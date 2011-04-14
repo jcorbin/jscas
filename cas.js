@@ -92,7 +92,8 @@ Grammar.prototype.recognizeToken = function(input) {
 ;
 };
 Grammar.prototype.parse = function(input) {
-    return new Lexer(this, input);
+    var lexer = new Lexer(this, input);
+    return lexer.all();
 };
 
 return {
