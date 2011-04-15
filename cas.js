@@ -64,10 +64,7 @@ Lexer.prototype.token = function() {
     return [match.token, match.value];
 };
 
-function Grammar() {
-    this.tokens = [];
-}
-Grammar.prototype.token = function(token, regex) {
+function regex_recognizer(token, regex) {
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
             throw new Error("Invalid regex");
@@ -75,15 +72,22 @@ Grammar.prototype.token = function(token, regex) {
     }
     regex = "^\\s*(" + regex + ")";
     regex = new RegExp(regex);
-
-    this.tokens.push(function(input) {
+    return function(input) {
         var match = regex.exec(input);
         if (match) {
             match.token = token;
             match.value = match[1];
         }
         return match;
-    });
+    };
+}
+
+function Grammar() {
+    this.tokens = [];
+}
+
+Grammar.prototype.token = function(token, regex) {
+    this.tokens.push(regex_recognizer(token, regex));
 };
 Grammar.prototype.recognizeToken = function(input) {
     for (var i=0, l=this.tokens; i<l.length; i++) {
