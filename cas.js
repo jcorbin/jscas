@@ -80,6 +80,12 @@ function regex_recognizer(token, regex) {
     };
 }
 
+function Parser(grammar, input) {
+    Lexer.call(this, grammar, input);
+};
+Parser.prototype = Object.create(Lexer.prototype);
+Parser.prototype.__constructor__ = Parser;
+
 function Grammar() {
     this.tokens = [];
 }
@@ -96,8 +102,8 @@ Grammar.prototype.recognizeToken = function(input) {
 ;
 };
 Grammar.prototype.parse = function(input) {
-    var lexer = new Lexer(this, input);
-    return lexer;
+    var parser = new Parser(this, input);
+    return parser;
 };
 
 return {
