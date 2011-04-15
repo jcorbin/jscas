@@ -37,7 +37,7 @@
                         switch (err.name) {
                         case "CAS.ParseError":
                             mess.innerText = "Error: " + err.message;
-                            inp.setSelectionRange(err.start, err.end+1);
+                            inp.setSelectionRange(err.start, err.end);
                             break;
                         default:
                             throw err;
