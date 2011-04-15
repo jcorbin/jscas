@@ -2,7 +2,7 @@
 
 var CAS = (function() {
 
-var Lexer = function(grammar, input) {
+function Lexer(grammar, input) {
     this.grammar = grammar;
     this.input = input;
     this.reset();
