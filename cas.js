@@ -58,6 +58,10 @@ Lexer.prototype.token = function() {
     return [match.token, match.value];
 };
 
+function regex_escape(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
 function regex_recognizer(token, regex) {
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
