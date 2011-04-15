@@ -1,3 +1,5 @@
+"use strict";
+
 var CAS = (function() {
 
 var Lexer = function(grammar, input) {
