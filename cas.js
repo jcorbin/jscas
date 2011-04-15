@@ -40,12 +40,6 @@ Lexer.prototype.error = function(message) {
     throw err;
 ;
 };
-Lexer.prototype.all = function() {
-    var tokens = [], token = null;
-    while (token = this.token())
-        tokens.push(token);
-    return tokens;
-};
 Lexer.prototype.token = function() {
     if (! this.working) return null;
     var match = this.grammar.recognizeToken(this.working);
@@ -99,7 +93,7 @@ Grammar.prototype.recognizeToken = function(input) {
 };
 Grammar.prototype.parse = function(input) {
     var lexer = new Lexer(this, input);
-    return lexer.all();
+    return lexer;
 };
 
 return {
