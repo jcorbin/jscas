@@ -125,6 +125,20 @@ Parser.prototype.advance = function(expected) {
     return token;
 };
 
+Parser.prototype.take = function(expected) {
+    var taken = this.token;
+    if (expected !== undefined) {
+        if (! taken)
+            taken = this.advance(expected);
+        else if (taken.value != expected)
+            taken.error("unexpected token, expecting " + expected);
+    } else if (! taken) {
+        taken = this.advance();
+    }
+    this.advance();
+    return taken;
+};
+
 Parser.prototype.expression = function(bp) {
     bp = bp || 0;
     var left = this.take().nud(this);
