@@ -11,11 +11,11 @@ Lexer.prototype.emptyRe = /^\s*$/;
 Lexer.prototype.reset = function() {
     this.working = this.input;
     this.position = 0;
-    this.last = null;
+    this.token = null;
 };
 // error(message, start, end) // error about a range
 // error(message, start)      // end = end of string
-// error(message)             // if last token, error about it, otherwise
+// error(message)             // if token, error about it, otherwise
 //                            // position to end of input
 Lexer.prototype.error = function(message) {
     var start, end;
@@ -25,9 +25,6 @@ Lexer.prototype.error = function(message) {
     } else if (arguments.length == 2) {
         start = arguments[1];
         end = this.input.length-1;
-    } else if (this.last) {
-        start = this.last[0];
-        end = this.last[1];
     } else {
         start = this.position;
         end = this.input.length-1;
@@ -40,6 +37,11 @@ Lexer.prototype.error = function(message) {
     throw err;
 ;
 };
+Lexer.prototype.error_context = function(start, end) {
+    return function(message) {
+        this.error(message, start, end);
+    }.bind(this);
+};
 Lexer.prototype.token = function() {
     if (! this.working) return null;
     var token = this.recognizer(this.working);
@@ -49,13 +51,13 @@ Lexer.prototype.token = function() {
         else
             return null;
     }
-    this.last = [
-        this.position + match[0].length - match[1].length,
-        this.position + match[0].length
-    ];
     var consumed = token.consumed,
         end = this.position + consumed;
     delete token.consumed;
+    token.error = this.error_context(
+        this.position + consumed - token.value.length,
+        this.position + consumed
+    );
     this.working = this.working.substr(consumed);
     this.position = end;
     return token;
