@@ -66,23 +66,24 @@ function regex_escape(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-function regex_recognizer(token, regex) {
-    return function(input) {
-        var match = this.exec(input);
-        return match ? {
-            "consumed": match[0].length,
-            "type": token,
-            "value": match[1]
-        } : null;
-    }.bind(regex_recognizer.prepare(regex));
-}
-regex_recognizer.prepare = function(regex) {
+function Recognizer(token, regex) {
+    this.token = token;
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
             throw new Error("Invalid regex");
         regex = regex.source;
     }
-    return new RegExp("^\\s*(" + regex + ")");
+    this.regex = new RegExp("^\\s*(" + regex + ")");
+}
+Recognizer.prototype = {
+    "recognize": function(input) {
+        var match = this.regex.exec(input);
+        return match ? {
+            "consumed": match[0].length,
+            "type": this.token,
+            "value": match[1]
+        } : null;
+    }
 };
 
 function Parser(grammar, input) {
@@ -163,20 +164,20 @@ Symbol.prototype = {
 
 function Grammar() {
     this.tokens = [
-        function() {return null} // initial no-op symbol recognizer
+        null // initial no-op symbol recognizer
     ];
     this.symbols = {};
     this.symbol("(end)");
 }
 Grammar.prototype = {
     "token": function(token, regex) {
-        this.tokens.push(regex_recognizer(token, regex));
+        this.tokens.push(new Recognizer(token, regex));
         return this.symbol("(" + token + ")");
     },
 
     "recognizeToken": function(input) {
         for (var i=0, l=this.tokens; i<l.length; i++) {
-            var match = this.tokens[i](input);
+            var match = this.tokens[i].recognize(input);
             if (match) return match;
         }
         return null;
@@ -192,7 +193,7 @@ Grammar.prototype = {
         for (var id in this.symbols)
             if (! /^\(.+\)$/.test(id))
                 symbols.push(regex_escape(id));
-        this.tokens[0] = regex_recognizer("symbol", symbols.join('|'));
+        this.tokens[0] = new Recognizer("symbol", symbols.join('|'));
     },
 
     "symbol": function(id, bp) {
