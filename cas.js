@@ -124,6 +124,14 @@ Parser.prototype.advance = function(expected) {
     return token;
 };
 
+Parser.prototype.expression = function(bp) {
+    bp = bp || 0;
+    var left = this.take().nud(this);
+    while (bp < this.token.bp)
+        left = this.take().led(this, left);
+    return left;
+};
+
 function Grammar() {
     this.tokens = [
         function() {return null} // initial no-op symbol recognizer
@@ -169,7 +177,7 @@ Grammar.prototype.recognizeToken = function(input) {
 };
 Grammar.prototype.parse = function(input) {
     var parser = new Parser(this, input);
-    return parser;
+    return parser.expression();
 };
 
 Grammar.prototype.updateSymbolRecognizer = function() {
