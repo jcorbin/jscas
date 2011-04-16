@@ -119,12 +119,6 @@ Parser.prototype.advance = function(expected) {
             return this.token = this.grammar.symbols["(end)"];
     else if (expected !== undefined && token.value != expected)
         token.error("unexpected token, expecting " + expected);
-    if (token.type == "symbol") {
-        var sym this.grammar.symbols[token.value];
-        if (! sym)
-            token.error("undefined token");
-        token.__proto__ = sym;
-    }
     return token;
 };
 
@@ -204,7 +198,10 @@ Grammar.prototype = {
         for (var id in this.symbols)
             if (! /^\(.+\)$/.test(id))
                 symbols.push(regex_escape(id));
-        this.tokens[0] = new Recognizer("symbol", symbols.join('|'));
+        this.tokens[0] = new Recognizer("symbol", symbols.join('|'),
+            function(type, value) {
+                return this.symbols[value];
+            }.bind(this));
     },
 
     "symbol": function(id, bp) {
