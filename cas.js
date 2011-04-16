@@ -132,7 +132,9 @@ Grammar.Symbol.prototype = {
 
 Grammar.prototype.token = function(token, regex) {
     this.tokens.push(regex_recognizer(token, regex));
+    return this.symbol("(" + token + ")");
 };
+
 Grammar.prototype.recognizeToken = function(input) {
     for (var i=0, l=this.tokens; i<l.length; i++) {
         var match = this.tokens[i](input);
