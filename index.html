@@ -23,7 +23,7 @@
                             throw new Error("not a number");
                         return n;
                     });
-                grammar.token("variable", /\w+/).nud = function(parser) {
+                grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
                     return this.value;
                 };
                 grammar.prefix("(", function(parser) {

@@ -36,7 +36,7 @@ Lexer.prototype = {
         var token = recognizer(this.working);
         if (! token) {
             if (! this.emptyRe.test(this.working))
-                this.error("trailing garbage", this.position);
+                this.error("unrecognized input");
             else
                 return null;
         }
