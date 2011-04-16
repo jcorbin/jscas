@@ -100,6 +100,30 @@ function Parser(grammar, input) {
 Parser.prototype = Object.create(Lexer.prototype);
 Parser.prototype.__constructor__ = Parser;
 
+Parser.prototype.advance = function(expected) {
+    var token = Lexer.prototype.advance.call(this);
+    if (! token)
+        if (expected !== undefined)
+            this.error("unexpected end of input");
+        else
+            return this.grammar.symbols["(end)"];
+    else if (expected !== undefined && token.value != expected)
+        token.error("unexpected token, expecting " + expected);
+    var sym;
+    switch (token.type) {
+    case "symbol":
+        sym = this.grammar.symbols[token.value];
+        break;
+    default:
+        sym = this.grammar.symbols["(" + token.type + ")"];
+        break;
+    }
+    if (! sym)
+        token.error("undefined token");
+    token.__proto__ = sym;
+    return token;
+};
+
 function Grammar() {
     this.tokens = [
         function() {return null} // initial no-op symbol recognizer
