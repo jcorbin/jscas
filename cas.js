@@ -42,8 +42,8 @@ Lexer.prototype.error = function(message) {
 };
 Lexer.prototype.token = function() {
     if (! this.working) return null;
-    var match = this.recognizer(this.working);
-    if (! match) {
+    var token = this.recognizer(this.working);
+    if (! token) {
         if (! this.emptyRe.test(this.working))
             this.error("trailing garbage", this.position);
         else
@@ -53,12 +53,12 @@ Lexer.prototype.token = function() {
         this.position + match[0].length - match[1].length,
         this.position + match[0].length
     ];
-    this.working = this.working.substr(match[0].length);
-    this.position += match[0].length;
-    return {
-        "type": match.token,
-        "value": match.value
-    };
+    var consumed = token.consumed,
+        end = this.position + consumed;
+    delete token.consumed;
+    this.working = this.working.substr(consumed);
+    this.position = end;
+    return token;
 };
 
 function regex_escape(text) {
@@ -67,12 +67,12 @@ function regex_escape(text) {
 
 function regex_recognizer(token, regex) {
     return function(input) {
-        var match = regex.exec(input);
-        if (match) {
-            match.token = token;
-            match.value = match[1];
-        }
-        return match;
+        var match = this.exec(input);
+        return match ? {
+            "consumed": match[0].length,
+            "type": token,
+            "value": match[1]
+        } : null;
     }.bind(regex_recognizer.prepare(regex));
 }
 regex_recognizer.prepare = function(regex) {
