@@ -197,15 +197,10 @@ Grammar.prototype = {
 
     "symbol": function(id, bp) {
         var s = this.symbols[id];
-        if (! s) {
-            if (bp != undefined)
-                s = new Symbol(id, bp);
-            else
-                s = new Symbol(id);
-            this.symbols[id] = s;
-        } else if (bp != undefined && bp > s.bp) {
+        if (! s)
+            this.symbols[id] = s = new Symbol(id, bp);
+        else if (bp != undefined && bp > s.bp)
             s.bp = bp;
-        }
         this.updateSymbolRecognizer();
         return s;
     },
