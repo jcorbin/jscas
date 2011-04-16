@@ -215,6 +215,45 @@ Grammar.prototype.literal = function(id, regex, constructor) {
     return sym;
 };
 
+Grammar.prototype.prefix = function(id, bp, nud) {
+    var sym = this.symbol(id);
+    sym.nud = nud || function(parser) {
+        this.expr = parser.expression(bp);
+        return this;
+    };
+    return sym;
+};
+
+Grammar.prototype.postfix = function(id, bp, led) {
+    var sym = this.symbol(id, bp);
+    sym.led = led || function(parser, left) {
+        this.expr = left;
+        return this;
+    };
+    return sym;
+};
+
+Grammar.prototype.infixl = function(id, bp, led) {
+    var sym = this.symbol(id, bp);
+    sym.led = led || function(parser, left) {
+        this.args = [left];
+        this.args.push(parser.expression(bp));
+        return this;
+    };
+    return sym;
+};
+
+Grammar.prototype.infixr = function(id, bp, led) {
+    var sym = this.symbol(id, bp);
+    bp -= 1;
+    sym.led = led || function(parser, left) {
+        this.args = [left];
+        this.args.push(parser.expression(bp));
+        return this;
+    };
+    return sym;
+};
+
 return {
     'Grammar': Grammar
 };
