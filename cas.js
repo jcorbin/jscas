@@ -84,7 +84,8 @@ Recognizer.prototype = {
         var match = this.regex.exec(input);
         if (! match) return null;
         var value = match[1];
-        var token = Object.create(this.token_prototype);
+        var proto = this.token_prototype;
+        var token = Object.create(proto);
         token.consumed = match[0].length;
         token.type = this.token;
         token.value = value;
