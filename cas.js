@@ -7,66 +7,67 @@ function Lexer(recognizer, input) {
     this.input = input;
     this.reset();
 };
-Lexer.prototype.emptyRe = /^\s*$/;
-Lexer.prototype.reset = function() {
-    this.working = this.input;
-    this.position = 0;
-    this.token = null;
-};
-// error(message, start, end) // error about a range
-// error(message, start)      // end = end of string
-// error(message)             // if token, error about it, otherwise
-//                            // position to end of input
-Lexer.prototype.error = function(message) {
-    var start, end;
-    if (arguments.length == 3) {
-        start = arguments[1];
-        end = arguments[2];
-    } else if (arguments.length == 2) {
-        start = arguments[1];
-        end = this.input.length-1;
-    } else {
-        start = this.position;
-        end = this.input.length-1;
+Lexer.prototype = {
+    "emptyRe": /^\s*$/,
+    "reset": function() {
+        this.working = this.input;
+        this.position = 0;
+        this.token = null;
+    },
+    // error(message, start, end) // error about a range
+    // error(message, start)      // end = end of string
+    // error(message)             // if token, error about it, otherwise
+    //                            // position to end of input
+    "error": function(message) {
+        var start, end;
+        if (arguments.length == 3) {
+            start = arguments[1];
+            end = arguments[2];
+        } else if (arguments.length == 2) {
+            start = arguments[1];
+            end = this.input.length-1;
+        } else {
+            start = this.position;
+            end = this.input.length-1;
+        }
+        var err = new Error(message);
+        err.name = 'CAS.ParseError';
+        err.input = this.input;
+        err.start = start;
+        err.end = end;
+        throw err;
+    },
+    "error_context": function(start, end) {
+        return function(message) {
+            this.error(message, start, end);
+        }.bind(this);
+    },
+    "advance": function() {
+        if (! this.working) return null;
+        var token = this.recognizer(this.working);
+        if (! token) {
+            if (! this.emptyRe.test(this.working))
+                this.error("trailing garbage", this.position);
+            else
+                return null;
+        }
+        var consumed = token.consumed,
+            end = this.position + consumed;
+        delete token.consumed;
+        token.error = this.error_context(
+            this.position + consumed - token.value.length,
+            this.position + consumed
+        );
+        this.working = this.working.substr(consumed);
+        this.position = end;
+        this.token = token;
+        return token;
+    },
+    "take": function() {
+        var taken = this.token || this.advance();
+        this.advance();
+        return taken;
     }
-    var err = new Error(message);
-    err.name = 'CAS.ParseError';
-    err.input = this.input;
-    err.start = start;
-    err.end = end;
-    throw err;
-;
-};
-Lexer.prototype.error_context = function(start, end) {
-    return function(message) {
-        this.error(message, start, end);
-    }.bind(this);
-};
-Lexer.prototype.advance = function() {
-    if (! this.working) return null;
-    var token = this.recognizer(this.working);
-    if (! token) {
-        if (! this.emptyRe.test(this.working))
-            this.error("trailing garbage", this.position);
-        else
-            return null;
-    }
-    var consumed = token.consumed,
-        end = this.position + consumed;
-    delete token.consumed;
-    token.error = this.error_context(
-        this.position + consumed - token.value.length,
-        this.position + consumed
-    );
-    this.working = this.working.substr(consumed);
-    this.position = end;
-    this.token = token;
-    return token;
-};
-Lexer.prototype.take = function() {
-    var taken = this.token || this.advance();
-    this.advance();
-    return taken;
 };
 
 function regex_escape(text) {
@@ -162,96 +163,98 @@ Grammar.Symbol.prototype = {
     }
 };
 
-Grammar.prototype.token = function(token, regex) {
-    this.tokens.push(regex_recognizer(token, regex));
-    return this.symbol("(" + token + ")");
-};
+Grammar.prototype = {
+    "token": function(token, regex) {
+        this.tokens.push(regex_recognizer(token, regex));
+        return this.symbol("(" + token + ")");
+    },
 
-Grammar.prototype.recognizeToken = function(input) {
-    for (var i=0, l=this.tokens; i<l.length; i++) {
-        var match = this.tokens[i](input);
-        if (match) return match;
-    }
-    return null;
-;
-};
-Grammar.prototype.parse = function(input) {
-    var parser = new Parser(this, input);
-    return parser.expression();
-};
-
-Grammar.prototype.updateSymbolRecognizer = function() {
-    var symbols = [];
-    for (var id in this.symbols)
-        if (! /^\(.+\)$/.test(id))
-            symbols.push(regex_escape(id));
-    this.tokens[0] = regex_recognizer("symbol", symbols.join('|'));
-};
-
-Grammar.prototype.symbol = function(id, bp) {
-    var s = this.symbols[id];
-    if (! s) {
-        if (bp != undefined)
-            s = new Grammar.Symbol(id, bp);
-        else
-            s = new Grammar.Symbol(id);
-        this.symbols[id] = s;
-    } else if (bp != undefined && bp > s.bp) {
-        s.bp = bp;
-    }
-    this.updateSymbolRecognizer();
-    return s;
-};
-
-Grammar.prototype.literal = function(id, regex, constructor) {
-    var sym = this.token(id, regex);
-    sym.nud = function(parser) {
-        try {
-            return constructor(this.value);
-        } catch (err) {
-            this.error(err.message);
+    "recognizeToken": function(input) {
+        for (var i=0, l=this.tokens; i<l.length; i++) {
+            var match = this.tokens[i](input);
+            if (match) return match;
         }
-    };
-    return sym;
-};
+        return null;
+    },
 
-Grammar.prototype.prefix = function(id, bp, nud) {
-    var sym = this.symbol(id);
-    sym.nud = nud || function(parser) {
-        this.expr = parser.expression(bp);
-        return this;
-    };
-    return sym;
-};
+    "parse": function(input) {
+        var parser = new Parser(this, input);
+        return parser.expression();
+    },
 
-Grammar.prototype.postfix = function(id, bp, led) {
-    var sym = this.symbol(id, bp);
-    sym.led = led || function(parser, left) {
-        this.expr = left;
-        return this;
-    };
-    return sym;
-};
+    "updateSymbolRecognizer": function() {
+        var symbols = [];
+        for (var id in this.symbols)
+            if (! /^\(.+\)$/.test(id))
+                symbols.push(regex_escape(id));
+        this.tokens[0] = regex_recognizer("symbol", symbols.join('|'));
+    },
 
-Grammar.prototype.infixl = function(id, bp, led) {
-    var sym = this.symbol(id, bp);
-    sym.led = led || function(parser, left) {
-        this.args = [left];
-        this.args.push(parser.expression(bp));
-        return this;
-    };
-    return sym;
-};
+    "symbol": function(id, bp) {
+        var s = this.symbols[id];
+        if (! s) {
+            if (bp != undefined)
+                s = new Grammar.Symbol(id, bp);
+            else
+                s = new Grammar.Symbol(id);
+            this.symbols[id] = s;
+        } else if (bp != undefined && bp > s.bp) {
+            s.bp = bp;
+        }
+        this.updateSymbolRecognizer();
+        return s;
+    },
 
-Grammar.prototype.infixr = function(id, bp, led) {
-    var sym = this.symbol(id, bp);
-    bp -= 1;
-    sym.led = led || function(parser, left) {
-        this.args = [left];
-        this.args.push(parser.expression(bp));
-        return this;
-    };
-    return sym;
+    "literal": function(id, regex, constructor) {
+        var sym = this.token(id, regex);
+        sym.nud = function(parser) {
+            try {
+                return constructor(this.value);
+            } catch (err) {
+                this.error(err.message);
+            }
+        };
+        return sym;
+    },
+
+    "prefix": function(id, bp, nud) {
+        var sym = this.symbol(id);
+        sym.nud = nud || function(parser) {
+            this.expr = parser.expression(bp);
+            return this;
+        };
+        return sym;
+    },
+
+    "postfix": function(id, bp, led) {
+        var sym = this.symbol(id, bp);
+        sym.led = led || function(parser, left) {
+            this.expr = left;
+            return this;
+        };
+        return sym;
+    },
+
+    "infixl": function(id, bp, led) {
+        var sym = this.symbol(id, bp);
+        sym.led = led || function(parser, left) {
+            this.args = [left];
+            this.args.push(parser.expression(bp));
+            return this;
+        };
+        return sym;
+    },
+
+    "infixr": function(id, bp, led) {
+        var sym = this.symbol(id, bp);
+        bp -= 1;
+        sym.led = led || function(parser, left) {
+            this.args = [left];
+            this.args.push(parser.expression(bp));
+            return this;
+        };
+        return sym;
+    }
 };
 
 return {
