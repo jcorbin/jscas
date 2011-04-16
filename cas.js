@@ -85,6 +85,15 @@ Recognizer.prototype = {
         if (! match) return null;
         var value = match[1];
         var proto = this.token_prototype;
+        if (typeof proto == "function") {
+            proto = proto(this.token, value);
+            if (! proto) // TODO parser.error once we have a parser handle
+                throw new Error("no prototype for token " +
+                    JSON.stringify({
+                        "type": this.token,
+                        "value": value
+                    }));
+        }
         var token = Object.create(proto);
         token.consumed = match[0].length;
         token.type = this.token;
