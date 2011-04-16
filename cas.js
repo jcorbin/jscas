@@ -42,7 +42,7 @@ Lexer.prototype.error_context = function(start, end) {
         this.error(message, start, end);
     }.bind(this);
 };
-Lexer.prototype.token = function() {
+Lexer.prototype.advance = function() {
     if (! this.working) return null;
     var token = this.recognizer(this.working);
     if (! token) {
@@ -60,7 +60,13 @@ Lexer.prototype.token = function() {
     );
     this.working = this.working.substr(consumed);
     this.position = end;
+    this.token = token;
     return token;
+};
+Lexer.prototype.take = function() {
+    var taken = this.token || this.advance();
+    this.advance();
+    return taken;
 };
 
 function regex_escape(text) {
