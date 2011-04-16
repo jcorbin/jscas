@@ -2,8 +2,8 @@
 
 var CAS = (function() {
 
-function Lexer(grammar, input) {
-    this.grammar = grammar;
+function Lexer(recognizer, input) {
+    this.recognizer = recognizer;
     this.input = input;
     this.reset();
 };
@@ -42,7 +42,7 @@ Lexer.prototype.error = function(message) {
 };
 Lexer.prototype.token = function() {
     if (! this.working) return null;
-    var match = this.grammar.recognizeToken(this.working);
+    var match = this.recognizer(this.working);
     if (! match) {
         if (! this.emptyRe.test(this.working))
             this.error("trailing garbage", this.position);
@@ -84,7 +84,9 @@ function regex_recognizer(token, regex) {
 }
 
 function Parser(grammar, input) {
-    Lexer.call(this, grammar, input);
+    this.grammar = grammar;
+    var recognizer = grammar.recognizeToken.bind(grammar);
+    Lexer.call(this, recognizer, input);
 };
 Parser.prototype = Object.create(Lexer.prototype);
 Parser.prototype.__constructor__ = Parser;
