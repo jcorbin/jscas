@@ -143,7 +143,6 @@ Grammar.prototype.parse = function(input) {
 };
 
 return {
-    'Lexer': Lexer,
     'Grammar': Grammar
 };
 })();
