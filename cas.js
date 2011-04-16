@@ -83,10 +83,11 @@ Recognizer.prototype = {
     "recognize": function(input) {
         var match = this.regex.exec(input);
         if (! match) return null;
+        var value = match[1];
         var token = Object.create(this.token_prototype);
         token.consumed = match[0].length;
         token.type = this.token;
-        token.value = match[1];
+        token.value = value;
         return token;
     }
 };
