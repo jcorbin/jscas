@@ -18,23 +18,12 @@ Lexer.prototype = {
     // error(message, start)      // end = end of string
     // error(message)             // if token, error about it, otherwise
     //                            // position to end of input
-    "error": function(message) {
-        var start, end;
-        if (arguments.length == 3) {
-            start = arguments[1];
-            end = arguments[2];
-        } else if (arguments.length == 2) {
-            start = arguments[1];
-            end = this.input.length-1;
-        } else {
-            start = this.position;
-            end = this.input.length-1;
-        }
+    "error": function(message, start, end) {
         var err = new Error(message);
         err.name = 'CAS.ParseError';
         err.input = this.input;
-        err.start = start;
-        err.end = end;
+        err.start = start || this.position;
+        err.end = end || this.input.length-1;
         throw err;
     },
     "error_context": function(start, end) {
