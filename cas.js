@@ -66,14 +66,18 @@ function regex_escape(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-function Recognizer(token, regex, token_prototype) {
-    this.token = token;
+function regex_leading_ws(regex) {
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
             throw new Error("Invalid regex");
         regex = regex.source;
     }
-    this.regex = new RegExp("^\\s*(" + regex + ")");
+    return new RegExp("^\\s*(" + regex + ")");
+}
+
+function Recognizer(token, regex, token_prototype) {
+    this.token = token;
+    this.regex = regex;
     if (token_prototype !== undefined)
         this.token_prototype = token_prototype;
 }
@@ -176,6 +180,7 @@ function Grammar() {
 Grammar.prototype = {
     "token": function(token, regex) {
         var sym = this.symbol("(" + token + ")");
+        regex = regex_leading_ws(regex);
         this.tokens.push(new Recognizer(token, regex, sym));
         return sym;
     },
@@ -198,7 +203,8 @@ Grammar.prototype = {
         for (var id in this.symbols)
             if (! /^\(.+\)$/.test(id))
                 symbols.push(regex_escape(id));
-        this.tokens[0] = new Recognizer("symbol", symbols.join('|'),
+        var regex = regex_leading_ws(symbols.join('|'));
+        this.tokens[0] = new Recognizer("symbol", regex,
             function(type, value) {
                 return this.symbols[value];
             }.bind(this));
