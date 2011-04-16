@@ -55,7 +55,10 @@ Lexer.prototype.token = function() {
     ];
     this.working = this.working.substr(match[0].length);
     this.position += match[0].length;
-    return [match.token, match.value];
+    return {
+        "type": match.token,
+        "value": match.value
+    };
 };
 
 function regex_escape(text) {
