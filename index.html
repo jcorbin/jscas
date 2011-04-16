@@ -15,6 +15,26 @@
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
                 var grammar = new CAS.Grammar();
+                grammar.literal("number",
+                    /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
+                    function(v) {
+                        var n = Number(v);
+                        if (isNaN(n))
+                            throw new Error("not a number");
+                        return n;
+                    });
+                grammar.token("variable", /\w+/).nud = function(parser) {
+                    return this.value;
+                };
+                grammar.prefix("(", function(parser) {
+                    var expr = parser.expression(0);
+                    parser.advance(")");
+                    return expr;
+                });
+                grammar.infixl('+', 50);
+                grammar.infixl('-', 50);
+                grammar.infixl('*', 60);
+                grammar.infixl('/', 60);
                 var results = document.getElementById("res");
                 function result(content) {
                     if (typeof content == "string") {
@@ -24,9 +44,6 @@
                     }
                     results.insertBefore(content, results.firstChild);
                 }
-                grammar.token("Number", /-?\d+(?:\.\d+)?(?:E\d+)?/),
-                grammar.token("Symbol", /[()+\-*\/]/)
-                grammar.token("Word", /\w+/),
                 inp.addEventListener('keypress', function(e) {
                     if (e.keyIdentifier != "Enter") return;
                     mess.innerText = "Parsing...";
