@@ -139,24 +139,16 @@ Parser.prototype.expression = function(bp) {
     return left;
 };
 
-function Grammar() {
-    this.tokens = [
-        function() {return null} // initial no-op symbol recognizer
-    ];
-    this.symbols = {};
-    this.symbol("(end)");
-}
-
 // Note, symbol instances are set as the prototype of tokens which have the following properties:
 //   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-Grammar.Symbol = function(id, bp) {
+function Symbol(id, bp) {
     this.id = id;
     if (bp !== undefined)
         this.bp = bp;
 }
-Grammar.Symbol.prototype = {
+Symbol.prototype = {
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -169,6 +161,13 @@ Grammar.Symbol.prototype = {
     }
 };
 
+function Grammar() {
+    this.tokens = [
+        function() {return null} // initial no-op symbol recognizer
+    ];
+    this.symbols = {};
+    this.symbol("(end)");
+}
 Grammar.prototype = {
     "token": function(token, regex) {
         this.tokens.push(regex_recognizer(token, regex));
@@ -200,9 +199,9 @@ Grammar.prototype = {
         var s = this.symbols[id];
         if (! s) {
             if (bp != undefined)
-                s = new Grammar.Symbol(id, bp);
+                s = new Symbol(id, bp);
             else
-                s = new Grammar.Symbol(id);
+                s = new Symbol(id);
             this.symbols[id] = s;
         } else if (bp != undefined && bp > s.bp) {
             s.bp = bp;
