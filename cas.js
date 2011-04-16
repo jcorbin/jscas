@@ -104,6 +104,28 @@ function Grammar() {
     this.tokens = [];
 }
 
+// Note, symbol instances are set as the prototype of tokens which have the following properties:
+//   type   the type of the token, set by recognizer
+//   value  the contents of the token, set by recognizer
+//   error  error reporting function, set by lexer
+Grammar.Symbol = function(id, bp) {
+    this.id = id;
+    if (bp !== undefined)
+        this.bp = bp;
+}
+Grammar.Symbol.prototype = {
+    // BP:  Binding Power (infix)
+    "bp":  0,
+    // NUD: NUll left Denotation, operator has nothing to its left (prefix)
+    "nud": function(parser) {
+        this.error("syntax error");
+    },
+    // LED: LEft Denotation, op has something to left (postfix or infix)
+    "led": function(parser, left) {
+        this.error("unexpected token");
+    }
+};
+
 Grammar.prototype.token = function(token, regex) {
     this.tokens.push(regex_recognizer(token, regex));
 };
