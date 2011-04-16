@@ -66,13 +66,6 @@ function regex_escape(text) {
 }
 
 function regex_recognizer(token, regex) {
-    if (typeof regex != "string") {
-        if (! regex instanceof RegExp)
-            throw new Error("Invalid regex");
-        regex = regex.source;
-    }
-    regex = "^\\s*(" + regex + ")";
-    regex = new RegExp(regex);
     return function(input) {
         var match = regex.exec(input);
         if (match) {
@@ -80,8 +73,16 @@ function regex_recognizer(token, regex) {
             match.value = match[1];
         }
         return match;
-    };
+    }.bind(regex_recognizer.prepare(regex));
 }
+regex_recognizer.prepare = function(regex) {
+    if (typeof regex != "string") {
+        if (! regex instanceof RegExp)
+            throw new Error("Invalid regex");
+        regex = regex.source;
+    }
+    return new RegExp("^\\s*(" + regex + ")");
+};
 
 function Parser(grammar, input) {
     this.grammar = grammar;
