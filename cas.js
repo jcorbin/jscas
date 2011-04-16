@@ -76,13 +76,16 @@ function Recognizer(token, regex) {
     this.regex = new RegExp("^\\s*(" + regex + ")");
 }
 Recognizer.prototype = {
+    "token_prototype": Object,
+
     "recognize": function(input) {
         var match = this.regex.exec(input);
-        return match ? {
-            "consumed": match[0].length,
-            "type": this.token,
-            "value": match[1]
-        } : null;
+        if (! match) return null;
+        var token = Object.create(this.token_prototype);
+        token.consumed = match[0].length;
+        token.type = this.token;
+        token.value = match[1];
+        return token;
     }
 };
 
