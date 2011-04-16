@@ -66,7 +66,7 @@ function regex_escape(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
 
-function Recognizer(token, regex) {
+function Recognizer(token, regex, token_prototype) {
     this.token = token;
     if (typeof regex != "string") {
         if (! regex instanceof RegExp)
@@ -74,6 +74,8 @@ function Recognizer(token, regex) {
         regex = regex.source;
     }
     this.regex = new RegExp("^\\s*(" + regex + ")");
+    if (token_prototype !== undefined)
+        this.token_prototype = token_prototype;
 }
 Recognizer.prototype = {
     "token_prototype": Object,
