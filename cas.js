@@ -102,6 +102,8 @@ Parser.prototype.__constructor__ = Parser;
 
 function Grammar() {
     this.tokens = [];
+    this.symbols = {};
+    this.symbol("(end)");
 }
 
 // Note, symbol instances are set as the prototype of tokens which have the following properties:
@@ -140,6 +142,20 @@ Grammar.prototype.recognizeToken = function(input) {
 Grammar.prototype.parse = function(input) {
     var parser = new Parser(this, input);
     return parser;
+};
+
+Grammar.prototype.symbol = function(id, bp) {
+    var s = this.symbols[id];
+    if (! s) {
+        if (bp != undefined)
+            s = new Grammar.Symbol(id, bp);
+        else
+            s = new Grammar.Symbol(id);
+        this.symbols[id] = s;
+    } else if (bp != undefined && bp > s.bp) {
+        s.bp = bp;
+    }
+    return s;
 };
 
 return {
