@@ -107,7 +107,7 @@ Parser.prototype.advance = function(expected) {
         if (expected !== undefined)
             this.error("unexpected end of input");
         else
-            return this.grammar.symbols["(end)"];
+            return this.token = this.grammar.symbols["(end)"];
     else if (expected !== undefined && token.value != expected)
         token.error("unexpected token, expecting " + expected);
     var sym;
