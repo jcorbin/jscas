@@ -108,18 +108,12 @@ Parser.prototype.advance = function(expected) {
             return this.token = this.grammar.symbols["(end)"];
     else if (expected !== undefined && token.value != expected)
         token.error("unexpected token, expecting " + expected);
-    var sym;
-    switch (token.type) {
-    case "symbol":
-        sym = this.grammar.symbols[token.value];
-        break;
-    default:
-        sym = this.grammar.symbols["(" + token.type + ")"];
-        break;
+    if (token.type == "symbol") {
+        var sym this.grammar.symbols[token.value];
+        if (! sym)
+            token.error("undefined token");
+        token.__proto__ = sym;
     }
-    if (! sym)
-        token.error("undefined token");
-    token.__proto__ = sym;
     return token;
 };
 
@@ -176,8 +170,9 @@ function Grammar() {
 }
 Grammar.prototype = {
     "token": function(token, regex) {
-        this.tokens.push(new Recognizer(token, regex));
-        return this.symbol("(" + token + ")");
+        var sym = this.symbol("(" + token + ")");
+        this.tokens.push(new Recognizer(token, regex, sym));
+        return sym;
     },
 
     "recognizeToken": function(input) {
