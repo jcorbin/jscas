@@ -203,6 +203,18 @@ Grammar.prototype.symbol = function(id, bp) {
     return s;
 };
 
+Grammar.prototype.literal = function(id, regex, constructor) {
+    var sym = this.token(id, regex);
+    sym.nud = function(parser) {
+        try {
+            return constructor(this.value);
+        } catch (err) {
+            this.error(err.message);
+        }
+    };
+    return sym;
+};
+
 return {
     'Grammar': Grammar
 };
