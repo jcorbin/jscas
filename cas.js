@@ -42,9 +42,9 @@ Lexer.prototype = {
             this.error(message, start, end);
         }.bind(this);
     },
-    "advance": function() {
+    "recognize": function(recognizer) {
         if (! this.working) return null;
-        var token = this.recognizer(this.working);
+        var token = recognizer(this.working);
         if (! token) {
             if (! this.emptyRe.test(this.working))
                 this.error("trailing garbage", this.position);
@@ -60,8 +60,11 @@ Lexer.prototype = {
         );
         this.working = this.working.substr(consumed);
         this.position = end;
-        this.token = token;
         return token;
+    },
+    "advance": function() {
+        this.token = this.recognize(this.recognizer);
+        return this.token;
     },
     "take": function() {
         var taken = this.token || this.advance();
