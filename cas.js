@@ -101,7 +101,9 @@ Parser.prototype = Object.create(Lexer.prototype);
 Parser.prototype.__constructor__ = Parser;
 
 function Grammar() {
-    this.tokens = [];
+    this.tokens = [
+        function() {return null} // initial no-op symbol recognizer
+    ];
     this.symbols = {};
     this.symbol("(end)");
 }
@@ -144,6 +146,14 @@ Grammar.prototype.parse = function(input) {
     return parser;
 };
 
+Grammar.prototype.updateSymbolRecognizer = function() {
+    var symbols = [];
+    for (var id in this.symbols)
+        if (! /^\(.+\)$/.test(id))
+            symbols.push(regex_escape(id));
+    this.tokens[0] = regex_recognizer("symbol", symbols.join('|'));
+};
+
 Grammar.prototype.symbol = function(id, bp) {
     var s = this.symbols[id];
     if (! s) {
@@ -155,6 +165,7 @@ Grammar.prototype.symbol = function(id, bp) {
     } else if (bp != undefined && bp > s.bp) {
         s.bp = bp;
     }
+    this.updateSymbolRecognizer();
     return s;
 };
 
