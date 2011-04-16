@@ -26,9 +26,10 @@
                 grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
                     return this.value;
                 };
-                grammar.prefix("(", function(parser) {
-                    var expr = parser.expression(0);
-                    parser.advance(")");
+                grammar.symbol(")");
+                grammar.prefix("(", 0, function(parser) {
+                    var expr = parser.expression();
+                    parser.take(")");
                     return expr;
                 });
                 grammar.infixl('+', 50);
