@@ -33,7 +33,7 @@ Lexer.prototype = {
     },
     "recognize": function(recognizer) {
         if (this.working == null) return null;
-        var token = recognizer(this.working) || null;
+        var token = (recognizer || this.recognizer)(this.working) || null;
         if (token) {
             var consumed = token.consumed,
                 end = this.position + consumed;
@@ -53,7 +53,7 @@ Lexer.prototype = {
         return token;
     },
     "advance": function() {
-        this.token = this.recognize(this.recognizer);
+        this.token = this.recognize();
         return this.token;
     },
     "take": function() {
