@@ -37,6 +37,7 @@ Lexer.prototype = {
         if (! token) {
             if (! this.emptyRe.test(this.working))
                 this.error("unrecognized input");
+            this.working = null;
             return null;
         }
         var consumed = token.consumed,
@@ -46,7 +47,8 @@ Lexer.prototype = {
             this.position + consumed - token.value.length,
             this.position + consumed
         );
-        this.working = this.working.substr(consumed);
+        this.working = this.working.length
+            ? this.working.substr(consumed) : null;
         this.position = end;
         return token;
     },
