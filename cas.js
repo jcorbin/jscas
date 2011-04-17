@@ -57,8 +57,8 @@ Lexer.prototype = {
         return this.token;
     },
     "take": function() {
-        var taken = this.token || this.advance();
-        this.advance();
+        var taken = this.token || this.recognize();
+        this.token = this.recognize();
         return taken;
     }
 };
