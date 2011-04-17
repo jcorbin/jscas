@@ -131,7 +131,6 @@ function Symbol(id, bp) {
         this.bp = bp;
 }
 Symbol.prototype = {
-    "type": "symbol",
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -154,7 +153,6 @@ function Grammar() {
 Grammar.prototype = {
     "token": function(token, regex) {
         var sym = new Symbol("(" + token + ")");
-        sym.type = token;
         regex = regex_leading_ws(regex);
         this.tokens.push(new Recognizer(regex, sym));
         return sym;
