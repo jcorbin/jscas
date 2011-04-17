@@ -174,14 +174,10 @@ Grammar.prototype = {
     },
 
     "updateSymbolRecognizer": function() {
-        var symbols = [];
-        for (var id in this.symbols)
-            symbols.push(regex_escape(id));
-        var regex = regex_leading_ws(symbols.join('|'));
-        this.tokens[0] = new Recognizer(regex,
-            function(value) {
-                return this.symbols[value];
-            }.bind(this));
+        this.tokens[0] = new Recognizer(
+            regex_leading_ws(Object.keys(this.symbols)
+                .map(regex_escape).join('|')),
+            function(key) {return this[key]}.bind(this.symbols));
     },
 
     "symbol": function(id, bp) {
