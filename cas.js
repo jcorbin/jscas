@@ -80,8 +80,7 @@ function regex_leading_ws(regex) {
     return new RegExp("^\\s*(" + regex + ")");
 }
 
-function Recognizer(token, regex, token_prototype) {
-    this.token = token;
+function Recognizer(regex, token_prototype) {
     this.regex = regex;
     if (token_prototype !== undefined)
         this.token_prototype = token_prototype;
@@ -95,17 +94,12 @@ Recognizer.prototype = {
         var value = match[1];
         var proto = this.token_prototype;
         if (typeof proto == "function") {
-            proto = proto(this.token, value);
+            proto = proto(value);
             if (! proto) // TODO parser.error once we have a parser handle
-                throw new Error("no prototype for token " +
-                    JSON.stringify({
-                        "type": this.token,
-                        "value": value
-                    }));
+                throw new Error("no prototype for token " + value);
         }
         var token = Object.create(proto);
         token.consumed = match[0].length;
-        token.type = this.token;
         token.value = value;
         return token;
     }
@@ -137,6 +131,7 @@ function Symbol(id, bp) {
         this.bp = bp;
 }
 Symbol.prototype = {
+    "type": "symbol",
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -159,8 +154,9 @@ function Grammar() {
 Grammar.prototype = {
     "token": function(token, regex) {
         var sym = this.symbol("(" + token + ")");
+        sym.type = token;
         regex = regex_leading_ws(regex);
-        this.tokens.push(new Recognizer(token, regex, sym));
+        this.tokens.push(new Recognizer(regex, sym));
         return sym;
     },
 
@@ -183,8 +179,8 @@ Grammar.prototype = {
             if (! /^\(.+\)$/.test(id))
                 symbols.push(regex_escape(id));
         var regex = regex_leading_ws(symbols.join('|'));
-        this.tokens[0] = new Recognizer("symbol", regex,
-            function(type, value) {
+        this.tokens[0] = new Recognizer(regex,
+            function(value) {
                 return this.symbols[value];
             }.bind(this));
     },
