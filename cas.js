@@ -117,12 +117,7 @@ Parser.prototype.__constructor__ = Parser;
 
 Parser.prototype.advance = function(expected) {
     var token = Lexer.prototype.advance.call(this);
-    if (! token)
-        if (expected !== undefined)
-            this.error("unexpected end of input");
-        else
-            return this.token = this.grammar.symbols["(end)"];
-    else if (expected !== undefined && token.value != expected)
+    if (expected !== undefined && token.value != expected)
         token.error("unexpected token, expecting " + expected);
     return token;
 };
@@ -176,7 +171,7 @@ function Grammar() {
         null // initial no-op symbol recognizer
     ];
     this.symbols = {};
-    this.symbol("(end)");
+    this.token('end', /$/);
 }
 Grammar.prototype = {
     "token": function(token, regex) {
