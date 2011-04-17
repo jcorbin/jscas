@@ -176,8 +176,7 @@ Grammar.prototype = {
     "updateSymbolRecognizer": function() {
         var symbols = [];
         for (var id in this.symbols)
-            if (! /^\(.+\)$/.test(id))
-                symbols.push(regex_escape(id));
+            symbols.push(regex_escape(id));
         var regex = regex_leading_ws(symbols.join('|'));
         this.tokens[0] = new Recognizer(regex,
             function(value) {
