@@ -153,7 +153,7 @@ function Grammar() {
 }
 Grammar.prototype = {
     "token": function(token, regex) {
-        var sym = this.symbol("(" + token + ")");
+        var sym = new Symbol("(" + token + ")");
         sym.type = token;
         regex = regex_leading_ws(regex);
         this.tokens.push(new Recognizer(regex, sym));
