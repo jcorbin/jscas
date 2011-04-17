@@ -32,7 +32,7 @@ Lexer.prototype = {
         }.bind(this);
     },
     "recognize": function(recognizer) {
-        if (! this.working) return null;
+        if (this.working == null) return null;
         var token = recognizer(this.working);
         if (! token) {
             if (! this.emptyRe.test(this.working))
