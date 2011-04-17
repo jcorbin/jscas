@@ -33,23 +33,23 @@ Lexer.prototype = {
     },
     "recognize": function(recognizer) {
         if (this.working == null) return null;
-        var token = recognizer(this.working);
-        if (! token) {
+        var token = recognizer(this.working) || null;
+        if (token) {
+            var consumed = token.consumed,
+                end = this.position + consumed;
+            delete token.consumed;
+            token.error = this.error_context(
+                this.position + consumed - token.value.length,
+                this.position + consumed
+            );
+            this.working = this.working.length
+                ? this.working.substr(consumed) : null;
+            this.position = end;
+        } else {
             if (! this.emptyRe.test(this.working))
                 this.error("unrecognized input");
             this.working = null;
-            return null;
         }
-        var consumed = token.consumed,
-            end = this.position + consumed;
-        delete token.consumed;
-        token.error = this.error_context(
-            this.position + consumed - token.value.length,
-            this.position + consumed
-        );
-        this.working = this.working.length
-            ? this.working.substr(consumed) : null;
-        this.position = end;
         return token;
     },
     "advance": function() {
