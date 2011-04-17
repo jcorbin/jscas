@@ -52,12 +52,16 @@ Lexer.prototype = {
         }
         return token;
     },
-    "advance": function() {
+    "advance": function(expected) {
         this.token = this.recognize();
+        if (expected !== undefined && token.value != expected)
+            token.error("unexpected token, expecting " + expected);
         return this.token;
     },
-    "take": function() {
+    "take": function(expected) {
         var taken = this.token || this.recognize();
+        if (expected !== undefined && taken.value != expected)
+            taken.error("unexpected taken, expecting " + expected);
         this.token = this.recognize();
         return taken;
     }
@@ -114,27 +118,6 @@ function Parser(grammar, input) {
 };
 Parser.prototype = Object.create(Lexer.prototype);
 Parser.prototype.__constructor__ = Parser;
-
-Parser.prototype.advance = function(expected) {
-    var token = Lexer.prototype.advance.call(this);
-    if (expected !== undefined && token.value != expected)
-        token.error("unexpected token, expecting " + expected);
-    return token;
-};
-
-Parser.prototype.take = function(expected) {
-    var taken = this.token;
-    if (expected !== undefined) {
-        if (! taken)
-            taken = this.advance(expected);
-        else if (taken.value != expected)
-            taken.error("unexpected token, expecting " + expected);
-    } else if (! taken) {
-        taken = this.advance();
-    }
-    this.advance();
-    return taken;
-};
 
 Parser.prototype.expression = function(bp) {
     bp = bp || 0;
