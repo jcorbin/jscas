@@ -82,27 +82,25 @@ function regex_leading_ws(regex) {
 
 function Recognizer(regex, token_prototype) {
     this.regex = regex;
-    if (token_prototype !== undefined)
-        this.token_prototype = token_prototype;
-}
-Recognizer.prototype = {
-    "token_prototype": Object,
 
-    "recognize": function(input) {
-        var match = this.regex.exec(input);
-        if (! match) return null;
-        var value = match[1];
-        var proto = this.token_prototype;
-        if (typeof proto == "function") {
-            proto = proto(value);
-            if (! proto) // TODO parser.error once we have a parser handle
-                throw new Error("no prototype for token " + value);
-        }
-        var token = Object.create(proto);
-        token.consumed = match[0].length;
-        token.value = value;
-        return token;
+    if (typeof token_prototype == "function") {
+        this.token = function(consumed, value) {
+            this.__proto__ = token_prototype(value);
+            this.consumed = consumed;
+            this.value = value;
+        };
+    } else {
+        this.token = function(consumed, value) {
+            this.consumed = consumed;
+            this.value = value;
+        };
+        this.token.prototype = token_prototype || Object;
     }
+}
+Recognizer.prototype.recognize = function(input) {
+    var match = this.regex.exec(input);
+    if (! match) return null;
+    return new this.token(match[0].length, match[1]);
 };
 
 function Parser(grammar, input) {
