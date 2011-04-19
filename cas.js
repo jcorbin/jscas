@@ -103,16 +103,12 @@ Grammar.Parser = function(grammar, input) {
     this.recognizer = CompoundRecognizer([
         new SymbolRecognizer(grammar.symbols)
     ].concat(grammar.tokens));
-    this.input = input;
-    this.reset();
+    this.input = this.working = input;
 };
 Grammar.Parser.prototype = {
+    "position": 0,
+    "token": null,
     "emptyRe": /^\s*$/,
-    "reset": function() {
-        this.working = this.input;
-        this.position = 0;
-        this.token = null;
-    },
     // error(message, start, end) // error about a range
     // error(message, start)      // end = end of string
     // error(message)             // if token, error about it, otherwise
