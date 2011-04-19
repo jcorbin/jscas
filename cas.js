@@ -67,9 +67,9 @@ Lexer.prototype = {
     }
 };
 
-function regex_escape(text) {
-    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-}
+var regex_escape = function(text) {
+    return text.replace(this, "\\$&");
+}.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
 function regex_leading_ws(regex) {
     if (typeof regex != "string") {
