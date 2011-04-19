@@ -8,6 +8,14 @@ function mixin(target, props) {
     return target;
 }
 
+function extend(base, constructor, props) {
+    var proto = constructor.prototype = Object.create(base.prototype);
+    proto.__constructor__ = constructor;
+    if (props)
+        mixin(proto, props)
+    return constructor;
+}
+
 function Lexer(recognizer, input) {
     this.recognizer = recognizer;
     this.input = input;
