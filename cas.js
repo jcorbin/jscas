@@ -119,12 +119,20 @@ function CompoundRecognizer(recognizers) {
 //   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-function Symbol(id, bp) {
+function Symbol(id, bp, nud, led) {
     this.id = id;
-    if (bp !== undefined)
-        this.bp = bp;
+    this.merge(bp, nud, led);
 }
 Symbol.prototype = {
+    "merge": function(bp, nud, led) {
+        if (bp !== undefined && bp > this.bp)
+            this.bp = bp;
+        if (nud)
+            this.nud = nud;
+        if (led)
+            this.led = led;
+        return this;
+    },
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -160,9 +168,9 @@ Grammar.Parser.prototype.expression = function(bp) {
 };
 
 Grammar.prototype = {
-    "token": function(token, regex) {
-        var sym = new Symbol("(" + token + ")");
+    "token": function(token, regex, nud) {
         regex = regex_leading_ws(regex);
+        var sym = new Symbol("(" + token + ")", 0, nud);
         this.tokens.push(new Recognizer(regex, sym));
         return sym;
     },
@@ -172,64 +180,54 @@ Grammar.prototype = {
         return parser.expression();
     },
 
-    "symbol": function(id, bp) {
+    "symbol": function(id, bp, nud, led) {
         var s = this.symbols[id];
         if (! s)
-            this.symbols[id] = s = new Symbol(id, bp);
-        else if (bp != undefined && bp > s.bp)
-            s.bp = bp;
+            this.symbols[id] = s = new Symbol(id, bp, nud, led);
+        else
+            s.merge(bp, nud, led);
         return s;
     },
 
     "literal": function(id, regex, constructor) {
-        var sym = this.token(id, regex);
-        sym.nud = function(parser) {
+        return this.token(id, regex, function(parser) {
             try {
                 return constructor(this.value);
             } catch (err) {
                 this.error(err.message);
             }
-        };
-        return sym;
+        });
     },
 
     "prefix": function(id, bp, nud) {
-        var sym = this.symbol(id);
-        sym.nud = nud || function(parser) {
+        return this.symbol(id, null, nud || function(parser) {
             this.expr = parser.expression(bp);
             return this;
-        };
-        return sym;
+        });
     },
 
     "postfix": function(id, bp, led) {
-        var sym = this.symbol(id, bp);
-        sym.led = led || function(parser, left) {
+        return this.symbol(id, bp, null, led || function(parser, left) {
             this.expr = left;
             return this;
-        };
-        return sym;
+        });
     },
 
     "infixl": function(id, bp, led) {
-        var sym = this.symbol(id, bp);
-        sym.led = led || function(parser, left) {
+        return this.symbol(id, bp, null, led || function(parser, left) {
             this.args = [left];
             this.args.push(parser.expression(bp));
             return this;
-        };
-        return sym;
+        });
     },
 
     "infixr": function(id, bp, led) {
-        var sym = this.symbol(id, bp);
         bp -= 1;
-        sym.led = led || function(parser, left) {
+        return this.symbol(id, bp, null, led || function(parser, left) {
             this.args = [left];
             this.args.push(parser.expression(bp));
             return this;
-        };
-        return sym;
+        });
     }
 };
 
