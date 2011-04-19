@@ -105,9 +105,19 @@ function SymbolRecognizer(symbols) {
 }
 SymbolRecognizer.prototype = Object.create(Recognizer.prototype);
 
+function CompoundRecognizer(recognizers) {
+    return function(input) {
+        for (var i=0; i<recognizers.length; i++) {
+            var match = recognizers[i].recognize(input);
+            if (match) return match;
+        }
+        return null;
+    }
+}
+
 function Parser(grammar, input) {
     this.grammar = grammar;
-    var recognizer = grammar.recognizeToken.bind(grammar);
+    var recognizer = CompoundRecognizer(this.grammar.tokens)
     Lexer.call(this, recognizer, input);
 };
 Parser.prototype = Object.create(Lexer.prototype);
@@ -156,14 +166,6 @@ Grammar.prototype = {
         regex = regex_leading_ws(regex);
         this.tokens.push(new Recognizer(regex, sym));
         return sym;
-    },
-
-    "recognizeToken": function(input) {
-        for (var i=0, l=this.tokens; i<l.length; i++) {
-            var match = this.tokens[i].recognize(input);
-            if (match) return match;
-        }
-        return null;
     },
 
     "parse": function(input) {
