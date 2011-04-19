@@ -117,7 +117,9 @@ function CompoundRecognizer(recognizers) {
 
 function Parser(grammar, input) {
     this.grammar = grammar;
-    var recognizer = CompoundRecognizer(this.grammar.tokens)
+    var recognizer = CompoundRecognizer([
+        new SymbolRecognizer(this.grammar.symbols)
+    ].concat(this.grammar.tokens))
     Lexer.call(this, recognizer, input);
 };
 Parser.prototype = Object.create(Lexer.prototype);
@@ -154,9 +156,7 @@ Symbol.prototype = {
 };
 
 function Grammar() {
-    this.tokens = [
-        null // initial no-op symbol recognizer
-    ];
+    this.tokens = [];
     this.symbols = {};
     this.token('end', /$/);
 }
@@ -173,17 +173,12 @@ Grammar.prototype = {
         return parser.expression();
     },
 
-    "updateSymbolRecognizer": function() {
-        this.tokens[0] = new SymbolRecognizer(this.symbols);
-    },
-
     "symbol": function(id, bp) {
         var s = this.symbols[id];
         if (! s)
             this.symbols[id] = s = new Symbol(id, bp);
         else if (bp != undefined && bp > s.bp)
             s.bp = bp;
-        this.updateSymbolRecognizer();
         return s;
     },
 
