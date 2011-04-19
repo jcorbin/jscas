@@ -167,6 +167,14 @@ Grammar.Parser.prototype.expression = function(bp) {
     return left;
 };
 
+function infix_led(bp) {
+    return function(parser, left) {
+        this.args = [left];
+        this.args.push(parser.expression(bp));
+        return this;
+    };
+}
+
 Grammar.prototype = {
     "token": function(token, regex, nud) {
         regex = regex_leading_ws(regex);
@@ -214,20 +222,11 @@ Grammar.prototype = {
     },
 
     "infixl": function(id, bp, led) {
-        return this.symbol(id, bp, null, led || function(parser, left) {
-            this.args = [left];
-            this.args.push(parser.expression(bp));
-            return this;
-        });
+        return this.symbol(id, bp, null, led || infix_led(bp));
     },
 
     "infixr": function(id, bp, led) {
-        bp -= 1;
-        return this.symbol(id, bp, null, led || function(parser, left) {
-            this.args = [left];
-            this.args.push(parser.expression(bp));
-            return this;
-        });
+        return this.symbol(id, bp, null, led || infix_led(bp - 1));
     }
 };
 
