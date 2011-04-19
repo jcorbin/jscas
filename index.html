@@ -36,6 +36,7 @@
                 grammar.infixl('-', 50);
                 grammar.infixl('*', 60);
                 grammar.infixl('/', 60);
+                grammar.prefix('-', 70);
                 var results = document.getElementById("res");
                 function result(content) {
                     if (typeof content == "string") {
