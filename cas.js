@@ -115,24 +115,6 @@ function CompoundRecognizer(recognizers) {
     }
 }
 
-function Parser(grammar, input) {
-    this.grammar = grammar;
-    var recognizer = CompoundRecognizer([
-        new SymbolRecognizer(this.grammar.symbols)
-    ].concat(this.grammar.tokens))
-    Lexer.call(this, recognizer, input);
-};
-Parser.prototype = Object.create(Lexer.prototype);
-Parser.prototype.__constructor__ = Parser;
-
-Parser.prototype.expression = function(bp) {
-    bp = bp || 0;
-    var left = this.take().nud(this);
-    while (bp < this.token.bp)
-        left = this.take().led(this, left);
-    return left;
-};
-
 // Note, symbol instances are set as the prototype of tokens which have the following properties:
 //   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
@@ -160,6 +142,23 @@ function Grammar() {
     this.symbols = {};
     this.token('end', /$/);
 }
+
+Grammar.Parser = function(grammar, input) {
+    var recognizer = CompoundRecognizer([
+        new SymbolRecognizer(grammar.symbols)
+    ].concat(grammar.tokens));
+    Lexer.call(this, recognizer, input);
+}
+Grammar.Parser.prototype = Object.create(Lexer.prototype);
+
+Grammar.Parser.prototype.expression = function(bp) {
+    bp = bp || 0;
+    var left = this.take().nud(this);
+    while (bp < this.token.bp)
+        left = this.take().led(this, left);
+    return left;
+};
+
 Grammar.prototype = {
     "token": function(token, regex) {
         var sym = new Symbol("(" + token + ")");
@@ -169,7 +168,7 @@ Grammar.prototype = {
     },
 
     "parse": function(input) {
-        var parser = new Parser(this, input);
+        var parser = new Grammar.Parser(this, input);
         return parser.expression();
     },
 
