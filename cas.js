@@ -2,6 +2,12 @@
 
 var CAS = (function() {
 
+function mixin(target, props) {
+    for (var i=0, l=Object.keys(props); i<l.length; i++)
+        target[l[i]] = props[l[i]];
+    return target;
+}
+
 function Lexer(recognizer, input) {
     this.recognizer = recognizer;
     this.input = input;
