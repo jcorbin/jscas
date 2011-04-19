@@ -82,26 +82,28 @@ function regex_leading_ws(regex) {
 
 function Recognizer(regex, token_prototype) {
     this.regex = regex;
-
-    if (typeof token_prototype == "function") {
-        this.token = function(consumed, value) {
-            this.__proto__ = token_prototype(value);
-            this.consumed = consumed;
-            this.value = value;
-        };
-    } else {
-        this.token = function(consumed, value) {
-            this.consumed = consumed;
-            this.value = value;
-        };
-        this.token.prototype = token_prototype || Object;
-    }
+    this.token = function(consumed, value) {
+        this.consumed = consumed;
+        this.value = value;
+    };
+    this.token.prototype = token_prototype || Object;
 }
 Recognizer.prototype.recognize = function(input) {
     var match = this.regex.exec(input);
     if (! match) return null;
     return new this.token(match[0].length, match[1]);
 };
+
+function SymbolRecognizer(symbols) {
+    this.token = function(consumed, value) {
+        this.__proto__ = symbols[value];
+        this.consumed = consumed;
+        this.value = value;
+    };
+    this.regex = regex_leading_ws(
+        Object.keys(symbols).map(regex_escape).join("|"));
+}
+SymbolRecognizer.prototype = Object.create(Recognizer.prototype);
 
 function Parser(grammar, input) {
     this.grammar = grammar;
@@ -170,10 +172,7 @@ Grammar.prototype = {
     },
 
     "updateSymbolRecognizer": function() {
-        this.tokens[0] = new Recognizer(
-            regex_leading_ws(Object.keys(this.symbols)
-                .map(regex_escape).join('|')),
-            function(key) {return this[key]}.bind(this.symbols));
+        this.tokens[0] = new SymbolRecognizer(this.symbols);
     },
 
     "symbol": function(id, bp) {
