@@ -171,9 +171,12 @@ Grammar.Parser.prototype = {
 
 function infix_led(bp) {
     return function(parser, left) {
-        this.args = [left];
-        this.args.push(parser.expression(bp));
-        return this;
+        var expr = parser.expression(bp);
+        if (Array.isArray(left) && left[0] == this.value)
+            left.push(expr);
+        else
+            left = [this.value, left, expr];
+        return left;
     };
 }
 
@@ -211,15 +214,13 @@ Grammar.prototype = {
 
     "prefix": function(id, bp, nud) {
         return this.symbol(id, null, nud || function(parser) {
-            this.expr = parser.expression(bp);
-            return this;
+            return [this.value, parser.expression(bp)];
         });
     },
 
     "postfix": function(id, bp, led) {
         return this.symbol(id, bp, null, led || function(parser, left) {
-            this.expr = left;
-            return this;
+            return [this.value, left];
         });
     },
 
