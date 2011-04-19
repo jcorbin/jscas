@@ -16,71 +16,6 @@ function extend(base, constructor, props) {
     return constructor;
 }
 
-function Lexer(recognizer, input) {
-    this.recognizer = recognizer;
-    this.input = input;
-    this.reset();
-};
-Lexer.prototype = {
-    "emptyRe": /^\s*$/,
-    "reset": function() {
-        this.working = this.input;
-        this.position = 0;
-        this.token = null;
-    },
-    // error(message, start, end) // error about a range
-    // error(message, start)      // end = end of string
-    // error(message)             // if token, error about it, otherwise
-    //                            // position to end of input
-    "error": function(message, start, end) {
-        var err = new Error(message);
-        err.name = 'CAS.ParseError';
-        err.input = this.input;
-        err.start = start || this.position;
-        err.end = end || this.input.length-1;
-        throw err;
-    },
-    "error_context": function(start, end) {
-        return function(message) {
-            this.error(message, start, end);
-        }.bind(this);
-    },
-    "recognize": function(recognizer) {
-        if (this.working == null) return null;
-        var token = (recognizer || this.recognizer)(this.working) || null;
-        if (token) {
-            var consumed = token.consumed,
-                end = this.position + consumed;
-            delete token.consumed;
-            token.error = this.error_context(
-                this.position + consumed - token.value.length,
-                this.position + consumed
-            );
-            this.working = this.working.length
-                ? this.working.substr(consumed) : null;
-            this.position = end;
-        } else {
-            if (! this.emptyRe.test(this.working))
-                this.error("unrecognized input");
-            this.working = null;
-        }
-        return token;
-    },
-    "advance": function(expected) {
-        this.token = this.recognize();
-        if (expected !== undefined && token.value != expected)
-            token.error("unexpected token, expecting " + expected);
-        return this.token;
-    },
-    "take": function(expected) {
-        var taken = this.token || this.recognize();
-        if (expected !== undefined && taken.value != expected)
-            taken.error("unexpected taken, expecting " + expected);
-        this.token = this.recognize();
-        return taken;
-    }
-};
-
 var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
@@ -164,12 +99,71 @@ function Grammar() {
     this.token('end', /$/);
 }
 
-Grammar.Parser = extend(Lexer, function(grammar, input) {
-    var recognizer = CompoundRecognizer([
+Grammar.Parser = function(grammar, input) {
+    this.recognizer = CompoundRecognizer([
         new SymbolRecognizer(grammar.symbols)
     ].concat(grammar.tokens));
-    Lexer.call(this, recognizer, input);
-}, {
+    this.input = input;
+    this.reset();
+};
+Grammar.Parser.prototype = {
+    "emptyRe": /^\s*$/,
+    "reset": function() {
+        this.working = this.input;
+        this.position = 0;
+        this.token = null;
+    },
+    // error(message, start, end) // error about a range
+    // error(message, start)      // end = end of string
+    // error(message)             // if token, error about it, otherwise
+    //                            // position to end of input
+    "error": function(message, start, end) {
+        var err = new Error(message);
+        err.name = 'CAS.ParseError';
+        err.input = this.input;
+        err.start = start || this.position;
+        err.end = end || this.input.length-1;
+        throw err;
+    },
+    "error_context": function(start, end) {
+        return function(message) {
+            this.error(message, start, end);
+        }.bind(this);
+    },
+    "recognize": function(recognizer) {
+        if (this.working == null) return null;
+        var token = (recognizer || this.recognizer)(this.working) || null;
+        if (token) {
+            var consumed = token.consumed,
+                end = this.position + consumed;
+            delete token.consumed;
+            token.error = this.error_context(
+                this.position + consumed - token.value.length,
+                this.position + consumed
+            );
+            this.working = this.working.length
+                ? this.working.substr(consumed) : null;
+            this.position = end;
+        } else {
+            if (! this.emptyRe.test(this.working))
+                this.error("unrecognized input");
+            this.working = null;
+        }
+        return token;
+    },
+    "advance": function(expected) {
+        this.token = this.recognize();
+        if (expected !== undefined && token.value != expected)
+            token.error("unexpected token, expecting " + expected);
+        return this.token;
+    },
+    "take": function(expected) {
+        var taken = this.token || this.recognize();
+        if (expected !== undefined && taken.value != expected)
+            taken.error("unexpected taken, expecting " + expected);
+        this.token = this.recognize();
+        return taken;
+    },
     "expression": function(bp) {
         bp = bp || 0;
         var left = this.take().nud(this);
@@ -177,7 +171,7 @@ Grammar.Parser = extend(Lexer, function(grammar, input) {
             left = this.take().led(this, left);
         return left;
     }
-});
+};
 
 function infix_led(bp) {
     return function(parser, left) {
