@@ -108,7 +108,7 @@ Recognizer.prototype.recognize = function(input) {
     return new this.token(match[0].length, match[1]);
 };
 
-function SymbolRecognizer(symbols) {
+var SymbolRecognizer = extend(Recognizer, function(symbols) {
     this.token = function(consumed, value) {
         this.__proto__ = symbols[value];
         this.consumed = consumed;
@@ -116,8 +116,7 @@ function SymbolRecognizer(symbols) {
     };
     this.regex = regex_leading_ws(
         Object.keys(symbols).map(regex_escape).join("|"));
-}
-SymbolRecognizer.prototype = Object.create(Recognizer.prototype);
+});
 
 function CompoundRecognizer(recognizers) {
     return function(input) {
@@ -165,21 +164,20 @@ function Grammar() {
     this.token('end', /$/);
 }
 
-Grammar.Parser = function(grammar, input) {
+Grammar.Parser = extend(Lexer, function(grammar, input) {
     var recognizer = CompoundRecognizer([
         new SymbolRecognizer(grammar.symbols)
     ].concat(grammar.tokens));
     Lexer.call(this, recognizer, input);
-}
-Grammar.Parser.prototype = Object.create(Lexer.prototype);
-
-Grammar.Parser.prototype.expression = function(bp) {
-    bp = bp || 0;
-    var left = this.take().nud(this);
-    while (bp < this.token.bp)
-        left = this.take().led(this, left);
-    return left;
-};
+}, {
+    "expression": function(bp) {
+        bp = bp || 0;
+        var left = this.take().nud(this);
+        while (bp < this.token.bp)
+            left = this.take().led(this, left);
+        return left;
+    }
+});
 
 function infix_led(bp) {
     return function(parser, left) {
