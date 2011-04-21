@@ -394,6 +394,29 @@ RationalNumber.prototype = {
     }
 };
 
+var Negative = function(expr) {
+    this.expr = expr;
+}
+Negative.make = function(expr) {
+    if (typeof expr == "number") {
+        return -1 * expr;
+    } else if (expr instanceof RationalNumber) {
+        return new RationalNumber(expr.numer * -1, expr.denom);
+    } else if (expr instanceof Negative) {
+        return expr.expr;
+    } else {
+        return new Negative(expr);
+    }
+};
+Negative.prototype = {
+    "toString": function() {
+        return "-" + this.expr.toString();
+    },
+    "toJSON": function() {
+        return ["-", this.expr];
+    }
+};
+
 return {
     'Grammar': Grammar,
     'RationalNumber': RationalNumber
