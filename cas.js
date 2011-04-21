@@ -124,7 +124,7 @@ function Symbol(id, bp, nud, led) {
 }
 Symbol.prototype = {
     "merge": function(bp, nud, led) {
-        if (bp !== undefined && bp > this.bp)
+        if (bp && bp > this.bp)
             this.bp = bp;
         if (nud)
             this.nud = nud;
