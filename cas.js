@@ -417,8 +417,17 @@ Negative.prototype = {
     }
 };
 
+function Variable(name) {
+    this.name = name;
+}
+Variable.prototype = {
+    "toString": function() {return this.name}
+};
+Variable.prototype.toJSON = Variable.prototype.toString;
+
 return {
     'Grammar': Grammar,
-    'RationalNumber': RationalNumber
+    'RationalNumber': RationalNumber,
+    'Variable': Variable
 };
 })();
