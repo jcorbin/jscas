@@ -55,14 +55,17 @@ var SymbolRecognizer = extend(Recognizer, function(symbols) {
 });
 
 function CompoundRecognizer(recognizers) {
-    return function(input) {
-        for (var i=0; i<recognizers.length; i++) {
-            var match = recognizers[i].recognize(input);
+    this.recognizers = recognizers;
+}
+CompoundRecognizer.prototype = {
+    "recognize": function(input) {
+        for (var i=0; i<this.recognizers.length; i++) {
+            var match = this.recognizers[i].recognize(input);
             if (match) return match;
         }
         return null;
     }
-}
+};
 
 // Note, symbol instances are set as the prototype of tokens which have the following properties:
 //   type   the type of the token, set by recognizer
@@ -101,7 +104,7 @@ function Grammar() {
 }
 
 Grammar.Parser = function(grammar, input) {
-    this.recognizer = CompoundRecognizer([
+    this.recognizer = new CompoundRecognizer([
         new SymbolRecognizer(grammar.symbols)
     ].concat(grammar.tokens));
     this.input = this.working = input;
@@ -130,7 +133,7 @@ Grammar.Parser.prototype = {
     "recognize": function(recognizer) {
         recognizer = recognizer || this.recognizer;
         if (this.working == null) return null;
-        var token = recognizer(this.working) || null;
+        var token = recognizer.recognize(this.working) || null;
         if (token) {
             var consumed = token.consumed,
                 end = this.position + consumed;
