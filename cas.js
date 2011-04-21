@@ -128,8 +128,9 @@ Grammar.Parser.prototype = {
         }.bind(this);
     },
     "recognize": function(recognizer) {
+        recognizer = recognizer || this.recognizer;
         if (this.working == null) return null;
-        var token = (recognizer || this.recognizer)(this.working) || null;
+        var token = recognizer(this.working) || null;
         if (token) {
             var consumed = token.consumed,
                 end = this.position + consumed;
