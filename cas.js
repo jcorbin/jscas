@@ -44,6 +44,7 @@ Recognizer.prototype.recognize = function(input) {
 };
 
 var SymbolRecognizer = extend(Recognizer, function(symbols) {
+    this.symbols = symbols;
     this.token = function(consumed, value) {
         this.__proto__ = symbols[value];
         this.consumed = consumed;
