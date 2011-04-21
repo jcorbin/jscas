@@ -55,15 +55,62 @@ var SymbolRecognizer = extend(Recognizer, function(symbols) {
 });
 
 function CompoundRecognizer(recognizers) {
-    this.recognizers = recognizers;
+    this.recognizers = [];
+    recognizers.forEach(function(r) {
+        if (r instanceof SymbolRecognizer)
+            return Object.keys(r.symbols).forEach(function(key) {
+                this.push("^\\s*("+regex_escape(key)+")", r.symbols[key]);
+            }, this);
+        else
+            this.push(r.regex.source, r.token.prototype);
+    }, this.recognizers);
+    this.updateRegex();
 }
 CompoundRecognizer.prototype = {
     "recognize": function(input) {
-        for (var i=0; i<this.recognizers.length; i++) {
-            var match = this.recognizers[i].recognize(input);
-            if (match) return match;
-        }
+        var match = this.regex.exec(input);
+        for (var i=1; i<match.length; i++)
+            if (match[i] !== undefined) {
+                var token = Object.create(this.recognizers[2*i-1]);
+                token.consumed = match[0].length;
+                token.value = match[i];
+                return token;
+            }
         return null;
+    },
+    "addRecognizer": function(regex, prototype) {
+        this.recognizers.push(regex, prototype);
+        this.updateRegex();
+    },
+    "updateRegex": function() {
+        var rs = [], i = -1, curws = false;
+        for (var j=0; j<this.recognizers.length; j+=2) {
+            var s = this.recognizers[j],
+                ws = s.substr(0, 4) == "^\\s*";
+            if (ws) {
+                if (ws != curws) {
+                    rs.push([]);
+                    i++;
+                    rs[i].prefix = s.substr(0, 4);
+                }
+                rs[i].push(s.substr(4));
+            } else {
+                rs.push(s);
+                i++;
+            }
+            curws = ws;
+        }
+        rs = rs.map(function(r) {
+            if (Array.isArray(r))
+                return r.prefix + "(?:" + r.join("|") + ")";
+            else
+                return r;
+        });
+        if (rs.length > 1)
+            rs = "(?:" + rs.join("|") + ")";
+        else
+            rs = rs[0];
+        this.regex = rs = new RegExp(rs);
     }
 };
 
