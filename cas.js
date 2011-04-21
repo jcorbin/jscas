@@ -294,6 +294,11 @@ Grammar.prototype = {
     }
 };
 
+function gcd(a, b) {
+    if (b > a) return gcd(b, a);
+    return b == 0 ? a : gcd(b, a % b);
+}
+
 return {
     'Grammar': Grammar
 };
