@@ -246,6 +246,15 @@ Grammar.prototype = {
     },
 
     "symbol": function(id, bp, nud, led) {
+        if (id instanceof Symbol) {
+            var s = id;
+            id = s.id;
+            if (id in this.symbols)
+                this.symbols[id].merge(s.bp, s.nud, s.led);
+            else
+                this.symbols[id] = s;
+            return s;
+        }
         var s = this.symbols[id];
         if (! s)
             this.symbols[id] = s = new Symbol(id, bp, nud, led);
