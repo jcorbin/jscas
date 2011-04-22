@@ -20,17 +20,8 @@ var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
-function regex_leading_ws(regex) {
-    if (typeof regex != "string") {
-        if (! regex instanceof RegExp)
-            throw new Error("Invalid regex");
-        regex = regex.source;
-    }
-    return new RegExp("^\\s*(" + regex + ")");
-}
-
 function Recognizer(regex, token_prototype) {
-    this.regex = regex;
+    this.regex = new RegExp(regex);
     this.token = function(consumed, value) {
         this.consumed = consumed;
         this.value = value;
@@ -222,7 +213,10 @@ function infix_led(bp) {
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
-        regex = regex_leading_ws(regex);
+        if (regex instanceof RegExp)
+            regex = regex.source;
+        else
+            regex = "^\\s*(" + regex + ")";
         var sym = new Symbol("(" + token + ")", 0, nud);
         this.tokens.push(new Recognizer(regex, sym));
         return sym;
