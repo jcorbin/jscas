@@ -14,7 +14,7 @@
             (function () {
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
-                var grammar = new CAS.Grammar();
+                var grammar = CAS.Arithmetic;
                 grammar.literal("number",
                     /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
                     function(v) {

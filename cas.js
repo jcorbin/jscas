@@ -425,9 +425,12 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
+var Arithmetic = new Grammar();
+
 return {
     'Grammar': Grammar,
     'RationalNumber': RationalNumber,
-    'Variable': Variable
+    'Variable': Variable,
+    'Arithmetic': Arithmetic
 };
 })();
