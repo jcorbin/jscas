@@ -20,27 +20,10 @@ var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
-function Recognizer(regex, token_prototype) {
-    this.regex = new RegExp(regex);
-    this.token = function(consumed, value) {
-        this.consumed = consumed;
-        this.value = value;
-    };
-    this.token.prototype = token_prototype || Object;
-}
-Recognizer.prototype.recognize = function(input) {
-    var match = this.regex.exec(input);
-    if (! match) return null;
-    return new this.token(match[0].length, match[1]);
-};
-
 function CompoundRecognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
-        if (r instanceof Recognizer)
-            this.push(r.regex.source, r.token.prototype);
-        else
-            this.push(r[0], r[1]);
+        this.push(r[0], r[1]);
     }, this.recognizers);
     this.updateRegex();
 }
@@ -218,7 +201,7 @@ Grammar.prototype = {
         else
             regex = "^\\s*(" + regex + ")";
         var sym = new Symbol("(" + token + ")", 0, nud);
-        this.tokens.push(new Recognizer(regex, sym));
+        this.tokens.push([regex, sym]);
         return sym;
     },
 
