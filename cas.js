@@ -263,16 +263,6 @@ Grammar.prototype = {
         return s;
     },
 
-    "literal": function(id, regex, constructor) {
-        return this.token(id, regex, function(parser) {
-            try {
-                return constructor(this.value);
-            } catch (err) {
-                this.error(err.message);
-            }
-        });
-    },
-
     "prefix": function(id, bp, nud) {
         return this.symbol(id, null, nud || function(parser) {
             return [this.value, parser.expression(bp)];
@@ -426,6 +416,13 @@ Variable.prototype = {
 Variable.prototype.toJSON = Variable.prototype.toString;
 
 var Arithmetic = new Grammar();
+Arithmetic.token("number", /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
+    function(parser) {
+        var n = Number(this.value);
+        if (isNaN(n))
+            token.error("not a number");
+        return n;
+    });
 
 return {
     'Grammar': Grammar,

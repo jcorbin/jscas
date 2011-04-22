@@ -15,14 +15,6 @@
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
                 var grammar = CAS.Arithmetic;
-                grammar.literal("number",
-                    /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
-                    function(v) {
-                        var n = Number(v);
-                        if (isNaN(n))
-                            throw new Error("not a number");
-                        return n;
-                    });
                 grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
                     return new CAS.Variable(this.value);
                 };
