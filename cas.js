@@ -61,8 +61,10 @@ function CompoundRecognizer(recognizers) {
             return Object.keys(r.symbols).forEach(function(key) {
                 this.push("^\\s*("+regex_escape(key)+")", r.symbols[key]);
             }, this);
-        else
+        else if (r instanceof Recognizer)
             this.push(r.regex.source, r.token.prototype);
+        else
+            this.push(r[0], r[1]);
     }, this.recognizers);
     this.updateRegex();
 }
