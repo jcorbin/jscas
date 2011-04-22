@@ -263,6 +263,12 @@ Grammar.prototype = {
         return s;
     },
 
+    "operator": function(symbol, bp, a, c) {
+        var op = new BinaryOperator(symbol, bp, a, c);
+        this.symbol(op.symbol);
+        return op;
+    },
+
     "prefix": function(id, bp, nud) {
         return this.symbol(id, null, nud || function(parser) {
             return [this.value, parser.expression(bp)];
