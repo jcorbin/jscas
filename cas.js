@@ -416,6 +416,12 @@ Variable.prototype = {
 Variable.prototype.toJSON = Variable.prototype.toString;
 
 var Arithmetic = new Grammar();
+Arithmetic.symbol(")");
+Arithmetic.prefix("(", 0, function(parser) {
+    var expr = parser.expression();
+    parser.take(")");
+    return expr;
+});
 Arithmetic.token("number", /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
     function(parser) {
         var n = Number(this.value);
