@@ -43,25 +43,10 @@ Recognizer.prototype.recognize = function(input) {
     return new this.token(match[0].length, match[1]);
 };
 
-var SymbolRecognizer = extend(Recognizer, function(symbols) {
-    this.symbols = symbols;
-    this.token = function(consumed, value) {
-        this.__proto__ = symbols[value];
-        this.consumed = consumed;
-        this.value = value;
-    };
-    this.regex = regex_leading_ws(
-        Object.keys(symbols).map(regex_escape).join("|"));
-});
-
 function CompoundRecognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
-        if (r instanceof SymbolRecognizer)
-            return Object.keys(r.symbols).forEach(function(key) {
-                this.push("^\\s*("+regex_escape(key)+")", r.symbols[key]);
-            }, this);
-        else if (r instanceof Recognizer)
+        if (r instanceof Recognizer)
             this.push(r.regex.source, r.token.prototype);
         else
             this.push(r[0], r[1]);
@@ -153,9 +138,10 @@ function Grammar() {
 }
 
 Grammar.Parser = function(grammar, input) {
-    var rs = new SymbolRecognizer(grammar.symbols);
-    rs = [rs].concat(grammar.tokens));
-    this.recognizer = new CompoundRecognizer(rs);
+    var rs = Object.keys(grammar.symbols).map(function(key) {
+        return ["^\\s*("+regex_escape(key)+")", this[key]];
+    }, grammar.symbols);
+    rs = rs.concat(grammar.tokens);
     this.input = this.working = input;
 };
 Grammar.Parser.prototype = {
