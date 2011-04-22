@@ -20,14 +20,14 @@ var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
-function CompoundRecognizer(recognizers) {
+function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
         this.push(r[0], r[1]);
     }, this.recognizers);
-    this.updateRegex();
+    this.update();
 }
-CompoundRecognizer.prototype = {
+Recognizer.prototype = {
     "recognize": function(input) {
         var match = this.regex.exec(input);
         for (var i=1; i<match.length; i++)
@@ -39,11 +39,11 @@ CompoundRecognizer.prototype = {
             }
         return null;
     },
-    "addRecognizer": function(regex, prototype) {
+    "add": function(regex, prototype) {
         this.recognizers.push(regex, prototype);
-        this.updateRegex();
+        this.update();
     },
-    "updateRegex": function() {
+    "update": function() {
         var rs = [], i = -1, curws = false;
         for (var j=0; j<this.recognizers.length; j+=2) {
             var s = this.recognizers[j],
@@ -116,6 +116,7 @@ Grammar.Parser = function(grammar, input) {
         return ["^\\s*("+regex_escape(key)+")", this[key]];
     }, grammar.symbols);
     rs = rs.concat(grammar.tokens);
+    this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
 Grammar.Parser.prototype = {
