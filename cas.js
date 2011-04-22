@@ -429,6 +429,9 @@ Arithmetic.token("number", /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
             token.error("not a number");
         return n;
     });
+Arithmetic.symbol('-').nud = function(parser) {
+    return Negative.make(parser.expression(70));
+};
 
 return {
     'Grammar': Grammar,
