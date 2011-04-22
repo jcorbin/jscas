@@ -415,6 +415,45 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
+function BinaryOperator(symbol_id, bp, associative, commutative) {
+    if (associative === undefined)
+        associative = true;
+    if (commutative === undefined)
+        commutative = true;
+    this.associative = associative;
+    this.commutative = commutative;
+    this.rbp = bp;
+    this.symbol = new Symbol(symbol_id, bp, null, this.led.bind(this));
+    this.symbol.op = this;
+
+    this.expression = extend(Array, function() {
+        for (var i=0; i<arguments.length; i++)
+            this.push(arguments[i]);
+    }, {
+        "op": this,
+        "toString": function() {
+            return this.join(" " + this.op.symbol.id + " ");
+        },
+        "toJSON": function() {
+            var a = [this.op.symbol.id];
+            for (var i=0; i<this.length; i++) a.push(this[i]);
+            return a;
+        }
+    });
+}
+BinaryOperator.prototype = {
+    "associative": true,
+    "commutative": true,
+    "led": function(parser, left) {
+        var expr = parser.expression(this.rbp);
+        if (this.associative && left instanceof this.expression)
+            left.push(expr);
+        else
+            left = new this.expression(left, expr);
+        return left;
+    }
+};
+
 var Arithmetic = new Grammar();
 Arithmetic.symbol(")");
 Arithmetic.prefix("(", 0, function(parser) {
@@ -437,6 +476,7 @@ return {
     'Grammar': Grammar,
     'RationalNumber': RationalNumber,
     'Variable': Variable,
+    'BinaryOperator': BinaryOperator,
     'Arithmetic': Arithmetic
 };
 })();
