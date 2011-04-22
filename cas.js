@@ -151,9 +151,9 @@ function Grammar() {
 }
 
 Grammar.Parser = function(grammar, input) {
-    this.recognizer = new CompoundRecognizer([
-        new SymbolRecognizer(grammar.symbols)
-    ].concat(grammar.tokens));
+    var rs = new SymbolRecognizer(grammar.symbols);
+    rs = [rs].concat(grammar.tokens));
+    this.recognizer = new CompoundRecognizer(rs);
     this.input = this.working = input;
 };
 Grammar.Parser.prototype = {
