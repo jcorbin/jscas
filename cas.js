@@ -474,6 +474,10 @@ Arithmetic.token("number", /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
             token.error("not a number");
         return n;
     });
+Arithmetic.operator("+", 50);
+Arithmetic.operator("-", 50);
+Arithmetic.operator("*", 60);
+Arithmetic.operator("/", 60);
 Arithmetic.symbol('-').nud = function(parser) {
     return Negative.make(parser.expression(70));
 };

@@ -18,10 +18,6 @@
                 grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
                     return new CAS.Variable(this.value);
                 };
-                grammar.infixl('+', 50);
-                grammar.infixl('-', 50);
-                grammar.infixl('*', 60);
-                grammar.infixl('/', 60);
                 var results = document.getElementById("res");
                 function result(content) {
                     if (typeof content == "string") {
