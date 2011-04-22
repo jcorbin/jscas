@@ -24,7 +24,7 @@
                         return n;
                     });
                 grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
-                    return this.value;
+                    return new CAS.Variable(this.value);
                 };
                 grammar.symbol(")");
                 grammar.prefix("(", 0, function(parser) {
