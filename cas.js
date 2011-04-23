@@ -203,6 +203,11 @@ Grammar.make_prefix_nud = function(bp) {
         return [this.value, parser.expression(bp)];
     };
 };
+Grammar.make_postfix_led = function(bp) {
+    return function(parser, left) {
+        return [this.value, left];
+    };
+};
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
@@ -238,9 +243,7 @@ Grammar.prototype = {
     "postfix": function(symbol, bp, led) {
         if (! (symbol instanceof Symbol))
             symbol = this.symbol(symbol, bp);
-        symbol.led = led || function(parser, left) {
-            return [this.value, left];
-        };
+        symbol.led = led || Grammar.make_postfix_led(bp);
         return symbol;
     },
 
