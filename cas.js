@@ -204,8 +204,6 @@ function infix_led(bp) {
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
-        if (typeof regex == "string")
-            new RegExp("^\\s*(" + regex + ")");
         var sym = new Symbol("(" + token + ")", regex, 0, nud);
         this.tokens.push(sym);
         return sym;
