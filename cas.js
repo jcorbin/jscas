@@ -206,7 +206,8 @@ Grammar.prototype = {
         if (typeof regex == "string")
             new RegExp("^\\s*(" + regex + ")");
         var sym = new Symbol("(" + token + ")", 0, nud);
-        this.tokens.push([regex, sym]);
+        sym.regex = regex;
+        this.tokens.push(sym);
         return sym;
     },
 
