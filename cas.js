@@ -82,8 +82,9 @@ Recognizer.prototype = {
 //   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-function Symbol(id, bp, nud, led) {
+function Symbol(id, regex, bp, nud, led) {
     this.id = id;
+    this.regex = regex;
     this.merge(bp, nud, led);
 }
 Symbol.prototype = {
@@ -121,7 +122,7 @@ Grammar.Parser = function(grammar, input) {
     var rs = Object.keys(grammar.symbols).map(
         function(key) {return this[key]}, grammar.symbols);
     rs = rs.concat(grammar.tokens);
-    rs.push([/^\s*()$/, new Symbol("(end)")]);
+    rs.push(new Symbol("(end)", /^\s*()$/));
     this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
@@ -205,8 +206,7 @@ Grammar.prototype = {
     "token": function(token, regex, nud) {
         if (typeof regex == "string")
             new RegExp("^\\s*(" + regex + ")");
-        var sym = new Symbol("(" + token + ")", 0, nud);
-        sym.regex = regex;
+        var sym = new Symbol("(" + token + ")", regex, 0, nud);
         this.tokens.push(sym);
         return sym;
     },
@@ -228,7 +228,7 @@ Grammar.prototype = {
         }
         var s = this.symbols[id];
         if (! s)
-            this.symbols[id] = s = new Symbol(id, bp, nud, led);
+            this.symbols[id] = s = new Symbol(id, null, bp, nud, led);
         else
             s.merge(bp, nud, led);
         return s;
@@ -400,7 +400,7 @@ function BinaryOperator(symbol_id, bp, associative, commutative) {
     this.associative = associative;
     this.commutative = commutative;
     this.rbp = bp;
-    this.symbol = new Symbol(symbol_id, bp, null, this.led.bind(this));
+    this.symbol = new Symbol(symbol_id, null, bp, null, this.led.bind(this));
     this.symbol.op = this;
 
     this.expression = extend(Array, function() {
