@@ -83,10 +83,9 @@ Recognizer.prototype = {
 //   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-function Symbol(id, regex, bp, nud, led) {
+function Symbol(regex, bp, nud, led) {
     if (typeof regex == "string")
         regex = new RegExp("^\\s*(" + regex_escape(regex) + ")");
-    this.id = id;
     this.regex = regex;
     this.merge(bp, nud, led);
 }
@@ -120,7 +119,7 @@ function Grammar() {
 Grammar.Parser = function(grammar, input) {
     var rs = grammar.symbols;
     rs = rs.concat(grammar.tokens);
-    rs.push(new Symbol("(end)", /^\s*()$/));
+    rs.push(new Symbol(/^\s*()$/));
     this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
@@ -202,7 +201,7 @@ function infix_led(bp) {
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
-        var sym = new Symbol("(" + token + ")", regex, 0, nud);
+        var sym = new Symbol(regex, 0, nud);
         this.tokens.push(sym);
         return sym;
     },
@@ -225,23 +224,35 @@ Grammar.prototype = {
     },
 
     "prefix": function(symbol, bp, nud) {
-        return this.symbol(symbol, null, nud || function(parser) {
+        if (! (symbol instanceof Symbol))
+            symbol = this.symbol(symbol);
+        symbol.nud = nud || function(parser) {
             return [this.value, parser.expression(bp)];
-        });
+        };
+        return symbol;
     },
 
     "postfix": function(symbol, bp, led) {
-        return this.symbol(symbol, bp, null, led || function(parser, left) {
+        if (! (symbol instanceof Symbol))
+            symbol = this.symbol(symbol, bp);
+        symbol.led = led || function(parser, left) {
             return [this.value, left];
-        });
+        };
+        return symbol;
     },
 
     "infixl": function(symbol, bp, led) {
-        return this.symbol(symbol, bp, null, led || infix_led(bp));
+        if (! (symbol instanceof Symbol))
+            symbol = this.symbol(symbol, bp);
+        symbol.led = led || infix_led(bp);
+        return symbol;
     },
 
     "infixr": function(symbol, bp, led) {
-        return this.symbol(symbol, bp, null, led || infix_led(bp - 1));
+        if (! (symbol instanceof Symbol))
+            symbol = this.symbol(symbol, bp);
+        symbol.led = led || infix_led(bp - 1);
+        return symbol;
     }
 };
 
@@ -384,7 +395,7 @@ function BinaryOperator(symbol, bp, associative, commutative) {
     this.associative = associative;
     this.commutative = commutative;
     this.rbp = bp;
-    this.symbol = new Symbol(symbol, symbol, bp, null, this.led.bind(this));
+    this.symbol = new Symbol(symbol, bp, null, this.led.bind(this));
     this.symbol.op = this;
 
     this.expression = extend(Array, function() {
