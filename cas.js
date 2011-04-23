@@ -390,12 +390,13 @@ function BinaryOperator(symbol, bp, associative, commutative) {
         for (var i=0; i<arguments.length; i++)
             this.push(arguments[i]);
     }, {
+        "symbol": symbol,
         "op": this,
         "toString": function() {
-            return this.join(" " + this.op.symbol.id + " ");
+            return this.join(" " + this.symbol + " ");
         },
         "toJSON": function() {
-            var a = [this.op.symbol.id];
+            var a = [this.symbol];
             for (var i=0; i<this.length; i++) a.push(this[i]);
             return a;
         }
