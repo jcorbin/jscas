@@ -198,6 +198,11 @@ Grammar.make_infix_led = function(bp) {
         return left;
     };
 };
+Grammar.make_prefix_nud = function(bp) {
+    return function(parser) {
+        return [this.value, parser.expression(bp)];
+    };
+};
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
@@ -226,9 +231,7 @@ Grammar.prototype = {
     "prefix": function(symbol, bp, nud) {
         if (! (symbol instanceof Symbol))
             symbol = this.symbol(symbol);
-        symbol.nud = nud || function(parser) {
-            return [this.value, parser.expression(bp)];
-        };
+        symbol.nud = nud || Grammar.make_prefix_nud(bp);
         return symbol;
     },
 
