@@ -394,12 +394,8 @@ Variable.prototype = {
 Variable.prototype.toJSON = Variable.prototype.toString;
 
 function BinaryOperator(symbol, bp, associative, commutative) {
-    if (associative === undefined)
-        associative = true;
-    if (commutative === undefined)
-        commutative = true;
-    this.associative = associative;
-    this.commutative = commutative;
+    if (associative == undefined) this.associative = associative;
+    if (commutative == undefined) this.commutative = commutative;
     this.rbp = bp;
     this.symbol = new Symbol(symbol, bp, null, this.led.bind(this));
     this.symbol.op = this;
