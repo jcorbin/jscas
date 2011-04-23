@@ -188,7 +188,7 @@ Grammar.Parser.prototype = {
     }
 };
 
-function infix_led(bp) {
+Grammar.make_infix_led = function(bp) {
     return function(parser, left) {
         var expr = parser.expression(bp);
         if (Array.isArray(left) && left[0] == this.value)
@@ -197,7 +197,7 @@ function infix_led(bp) {
             left = [this.value, left, expr];
         return left;
     };
-}
+};
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
@@ -244,14 +244,14 @@ Grammar.prototype = {
     "infixl": function(symbol, bp, led) {
         if (! (symbol instanceof Symbol))
             symbol = this.symbol(symbol, bp);
-        symbol.led = led || infix_led(bp);
+        symbol.led = led || Grammar.make_infix_led(bp);
         return symbol;
     },
 
     "infixr": function(symbol, bp, led) {
         if (! (symbol instanceof Symbol))
             symbol = this.symbol(symbol, bp);
-        symbol.led = led || infix_led(bp - 1);
+        symbol.led = led || Grammar.make_infix_led(bp - 1);
         return symbol;
     }
 };
