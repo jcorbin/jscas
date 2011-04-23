@@ -83,6 +83,8 @@ Recognizer.prototype = {
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
 function Symbol(id, regex, bp, nud, led) {
+    if (typeof regex == "string")
+        regex = new RegExp("^\\s*(" + regex_escape(regex) + ")");
     this.id = id;
     this.regex = regex;
     this.merge(bp, nud, led);
