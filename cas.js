@@ -113,12 +113,11 @@ Symbol.prototype = {
 
 function Grammar() {
     this.tokens = [];
-    this.symbols = {};
+    this.symbols = [];
 }
 
 Grammar.Parser = function(grammar, input) {
-    var rs = Object.keys(grammar.symbols).map(
-        function(key) {return this[key]}, grammar.symbols);
+    var rs = grammar.symbols;
     rs = rs.concat(grammar.tokens);
     rs.push(new Symbol("(end)", /^\s*()$/));
     this.recognizer = new Recognizer(rs);
@@ -214,25 +213,17 @@ Grammar.prototype = {
 
     "symbol": function(id, bp, nud, led) {
         if (id instanceof Symbol) {
-            var s = id;
-            id = s.id;
-            if (id in this.symbols)
-                this.symbols[id].merge(s.bp, s.nud, s.led);
-            else
-                this.symbols[id] = s;
-            return s;
+            this.symbols.push(id);
+            return id;
         }
-        var s = this.symbols[id];
-        if (! s)
-            this.symbols[id] = s = new Symbol(id, id, bp, nud, led);
-        else
-            s.merge(bp, nud, led);
+        var s = new Symbol(id, id, bp, nud, led);
+        this.symbols.push(s);
         return s;
     },
 
     "operator": function(symbol, bp, a, c) {
         var op = new BinaryOperator(symbol, bp, a, c);
-        this.symbol(op.symbol);
+        this.symbols.push(op.symbol);
         return op;
     },
 
