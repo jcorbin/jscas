@@ -24,7 +24,7 @@ function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
         if (r instanceof Symbol)
-            this.push(r.recognizer(), r);
+            this.push(r.regex, r);
         else
             this.push(r[0], r[1]);
     }, this.recognizers);
@@ -90,10 +90,6 @@ function Symbol(id, regex, bp, nud, led) {
     this.merge(bp, nud, led);
 }
 Symbol.prototype = {
-    "recognizer": function() {
-        return this.regex ? this.regex
-            : new RegExp("^\\s*(" + regex_escape(this.id) + ")");
-    },
     "merge": function(bp, nud, led) {
         if (bp && bp > this.bp)
             this.bp = bp;
