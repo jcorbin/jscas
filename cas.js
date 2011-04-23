@@ -212,10 +212,6 @@ Grammar.prototype = {
     },
 
     "symbol": function(id, bp, nud, led) {
-        if (id instanceof Symbol) {
-            this.symbols.push(id);
-            return id;
-        }
         var s = new Symbol(id, id, bp, nud, led);
         this.symbols.push(s);
         return s;
