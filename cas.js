@@ -112,7 +112,6 @@ Symbol.prototype = {
 function Grammar() {
     this.tokens = [];
     this.symbols = {};
-    this.token('end', /^\s*()$/);
 }
 
 Grammar.Parser = function(grammar, input) {
@@ -120,6 +119,7 @@ Grammar.Parser = function(grammar, input) {
         return [this[key].recognizer(), this[key]];
     }, grammar.symbols);
     rs = rs.concat(grammar.tokens);
+    rs.push([/^\s*()$/, new Symbol("(end)")]);
     this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
