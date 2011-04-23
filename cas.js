@@ -224,7 +224,7 @@ Grammar.prototype = {
 
     "operator": function(symbol, bp, a, c) {
         var op = new BinaryOperator(symbol, bp, a, c);
-        this.symbols.push(op.symbol);
+        this.symbols.push(op);
         return op;
     },
 
@@ -388,21 +388,18 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-function BinaryOperator(symbol, bp, associative, commutative) {
+var BinaryOperator = extend(Symbol, function(symbol, bp, associative, commutative) {
     if (associative == undefined) this.associative = associative;
     if (commutative == undefined) this.commutative = commutative;
     this.rbp = bp;
-    this.symbol = new Symbol(symbol, bp, null, this.led.bind(this));
-    this.symbol.op = this;
+    Symbol.call(this, symbol, bp);
 
     this.expression = extend(BinaryOperator.Expression, function() {
         BinaryOperator.Expression.apply(this, arguments);
     }, {
-        "symbol": symbol,
         "op": this
     });
-}
-BinaryOperator.prototype = {
+}, {
     "associative": true,
     "commutative": true,
     "led": function(parser, left) {
@@ -413,7 +410,8 @@ BinaryOperator.prototype = {
             left = new this.expression(left, expr);
         return left;
     }
-};
+});
+
 BinaryOperator.Expression = extend(Array, function() {
     for (var i=0; i<arguments.length; i++)
         this.push(arguments[i]);
@@ -422,15 +420,15 @@ BinaryOperator.Expression = extend(Array, function() {
         return this
             .map(function(arg) {
                 if (arg instanceof BinaryOperator.Expression
-                    && this.bp >= arg.op.symbol.bp)
+                    && this.bp >= arg.op.bp)
                     return "(" + arg + ")";
                 else
                     return arg;
-            }, this.op.symbol)
-            .join(" " + this.symbol + " ");
+            }, this.op)
+            .join(" " + this.op.symbol + " ");
     },
     "toJSON": function() {
-        var a = [this.symbol];
+        var a = [this.op.symbol];
         for (var i=0; i<this.length; i++) a.push(this[i]);
         return a;
     }
