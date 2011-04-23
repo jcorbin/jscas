@@ -388,17 +388,43 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-var BinaryOperator = extend(Symbol, function(symbol, bp, associative, commutative) {
-    if (associative == undefined) this.associative = associative;
-    if (commutative == undefined) this.commutative = commutative;
-    this.rbp = bp;
+var Operator = extend(Symbol, function(symbol, bp, rbp) {
+    this.rbp = rbp == undefined ? bp : rbp;
     Symbol.call(this, symbol, bp);
 
-    this.expression = extend(BinaryOperator.Expression, function() {
-        BinaryOperator.Expression.apply(this, arguments);
+    this.expression = extend(Operator.Expression, function() {
+        Operator.Expression.apply(this, arguments);
     }, {
         "op": this
     });
+});
+
+Operator.Expression = extend(Array, function() {
+    for (var i=0; i<arguments.length; i++)
+        this.push(arguments[i]);
+}, {
+    "toJSON": function() {
+        var a = [this.op.symbol];
+        for (var i=0; i<this.length; i++) a.push(this[i]);
+        return a;
+    }
+});
+
+var BinaryOperator = extend(Operator, function(symbol, bp, associative, commutative) {
+    if (associative == undefined) this.associative = associative;
+    if (commutative == undefined) this.commutative = commutative;
+    Operator.call(this, symbol, bp);
+    this.expression.prototype.toString = function() {
+        return this
+            .map(function(arg) {
+                if (arg instanceof Operator.Expression
+                    && this.bp >= arg.op.bp)
+                    return "(" + arg + ")";
+                else
+                    return arg;
+            }, this.op)
+            .join(" " + this.op.symbol + " ");
+    };
 }, {
     "associative": true,
     "commutative": true,
@@ -409,28 +435,6 @@ var BinaryOperator = extend(Symbol, function(symbol, bp, associative, commutativ
         else
             left = new this.expression(left, expr);
         return left;
-    }
-});
-
-BinaryOperator.Expression = extend(Array, function() {
-    for (var i=0; i<arguments.length; i++)
-        this.push(arguments[i]);
-}, {
-    "toString": function() {
-        return this
-            .map(function(arg) {
-                if (arg instanceof BinaryOperator.Expression
-                    && this.bp >= arg.op.bp)
-                    return "(" + arg + ")";
-                else
-                    return arg;
-            }, this.op)
-            .join(" " + this.op.symbol + " ");
-    },
-    "toJSON": function() {
-        var a = [this.op.symbol];
-        for (var i=0; i<this.length; i++) a.push(this[i]);
-        return a;
     }
 });
 
