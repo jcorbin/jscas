@@ -451,12 +451,11 @@ Arithmetic.token("number", /^\s*(-?\d+(?:\.\d+)?(?:E-?\d+)?)/,
         return n;
     });
 Arithmetic.operator("+", 50);
-Arithmetic.operator("-", 50);
-Arithmetic.operator("*", 60);
-Arithmetic.operator("/", 60);
-Arithmetic.symbol('-').nud = function(parser) {
+Arithmetic.operator("-", 50).nud = function(parser) {
     return Negative.make(parser.expression(70));
 };
+Arithmetic.operator("*", 60);
+Arithmetic.operator("/", 60);
 
 return {
     'Grammar': Grammar,
