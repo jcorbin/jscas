@@ -211,8 +211,8 @@ Grammar.prototype = {
         return parser.expression();
     },
 
-    "symbol": function(id, bp, nud, led) {
-        var s = new Symbol(id, id, bp, nud, led);
+    "symbol": function(symbol, bp, nud, led) {
+        var s = new Symbol(symbol, symbol, bp, nud, led);
         this.symbols.push(s);
         return s;
     },
@@ -223,24 +223,24 @@ Grammar.prototype = {
         return op;
     },
 
-    "prefix": function(id, bp, nud) {
-        return this.symbol(id, null, nud || function(parser) {
+    "prefix": function(symbol, bp, nud) {
+        return this.symbol(symbol, null, nud || function(parser) {
             return [this.value, parser.expression(bp)];
         });
     },
 
-    "postfix": function(id, bp, led) {
-        return this.symbol(id, bp, null, led || function(parser, left) {
+    "postfix": function(symbol, bp, led) {
+        return this.symbol(symbol, bp, null, led || function(parser, left) {
             return [this.value, left];
         });
     },
 
-    "infixl": function(id, bp, led) {
-        return this.symbol(id, bp, null, led || infix_led(bp));
+    "infixl": function(symbol, bp, led) {
+        return this.symbol(symbol, bp, null, led || infix_led(bp));
     },
 
-    "infixr": function(id, bp, led) {
-        return this.symbol(id, bp, null, led || infix_led(bp - 1));
+    "infixr": function(symbol, bp, led) {
+        return this.symbol(symbol, bp, null, led || infix_led(bp - 1));
     }
 };
 
@@ -375,7 +375,7 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-function BinaryOperator(symbol_id, bp, associative, commutative) {
+function BinaryOperator(symbol, bp, associative, commutative) {
     if (associative === undefined)
         associative = true;
     if (commutative === undefined)
@@ -383,7 +383,7 @@ function BinaryOperator(symbol_id, bp, associative, commutative) {
     this.associative = associative;
     this.commutative = commutative;
     this.rbp = bp;
-    this.symbol = new Symbol(symbol_id, symbol_id, bp, null, this.led.bind(this));
+    this.symbol = new Symbol(symbol, symbol, bp, null, this.led.bind(this));
     this.symbol.op = this;
 
     this.expression = extend(Array, function() {
