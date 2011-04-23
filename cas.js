@@ -75,7 +75,7 @@ Recognizer.prototype = {
             rs = "(?:" + rs.join("|") + ")";
         else
             rs = rs[0];
-        this.regex = rs = new RegExp(rs);
+        this.regex = new RegExp(rs);
     }
 };
 
