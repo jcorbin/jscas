@@ -33,6 +33,7 @@ function Recognizer(recognizers) {
 Recognizer.prototype = {
     "recognize": function(input) {
         var match = this.regex.exec(input);
+        if (! match) return null;
         for (var i=1; i<match.length; i++)
             if (match[i] !== undefined) {
                 var token = Object.create(this.recognizers[2*i-1]);
