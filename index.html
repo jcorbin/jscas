@@ -15,7 +15,7 @@
                 var inp = document.getElementById("i");
                 var mess = document.getElementById("m");
                 var grammar = CAS.Arithmetic;
-                grammar.token("variable", /[a-zA-Z][a-zA-Z0-9]*/).nud = function(parser) {
+                grammar.token("variable", /^\s*([a-zA-Z][a-zA-Z0-9]*)/).nud = function(parser) {
                     return new CAS.Variable(this.value);
                 };
                 var results = document.getElementById("res");

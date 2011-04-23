@@ -46,7 +46,7 @@ Recognizer.prototype = {
     "update": function() {
         var rs = [], i = -1, curws = false;
         for (var j=0; j<this.recognizers.length; j+=2) {
-            var s = this.recognizers[j],
+            var s = this.recognizers[j].source,
                 ws = s.substr(0, 4) == "^\\s*";
             if (ws) {
                 if (ws != curws) {
@@ -108,12 +108,12 @@ Symbol.prototype = {
 function Grammar() {
     this.tokens = [];
     this.symbols = {};
-    this.token('end', /$/);
+    this.token('end', /^\s*()$/);
 }
 
 Grammar.Parser = function(grammar, input) {
     var rs = Object.keys(grammar.symbols).map(function(key) {
-        return ["^\\s*("+regex_escape(key)+")", this[key]];
+        return [new RegExp("^\\s*("+regex_escape(key)+")"), this[key]];
     }, grammar.symbols);
     rs = rs.concat(grammar.tokens);
     this.recognizer = new Recognizer(rs);
@@ -197,10 +197,8 @@ function infix_led(bp) {
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
-        if (regex instanceof RegExp)
-            regex = regex.source;
-        else
-            regex = "^\\s*(" + regex + ")";
+        if (typeof regex == "string")
+            new RegExp("^\\s*(" + regex + ")");
         var sym = new Symbol("(" + token + ")", 0, nud);
         this.tokens.push([regex, sym]);
         return sym;
@@ -433,7 +431,7 @@ Arithmetic.prefix("(", 0, function(parser) {
     parser.take(")");
     return expr;
 });
-Arithmetic.token("number", /-?\d+(?:\.\d+)?(?:E-?\d+)?/,
+Arithmetic.token("number", /^\s*(-?\d+(?:\.\d+)?(?:E-?\d+)?)/,
     function(parser) {
         var n = Number(this.value);
         if (isNaN(n))
