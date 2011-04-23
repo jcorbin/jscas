@@ -23,7 +23,10 @@ var regex_escape = function(text) {
 function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
-        this.push(r[0], r[1]);
+        if (r instanceof Symbol)
+            this.push(r.recognizer(), r);
+        else
+            this.push(r[0], r[1]);
     }, this.recognizers);
     this.update();
 }
@@ -115,9 +118,8 @@ function Grammar() {
 }
 
 Grammar.Parser = function(grammar, input) {
-    var rs = Object.keys(grammar.symbols).map(function(key) {
-        return [this[key].recognizer(), this[key]];
-    }, grammar.symbols);
+    var rs = Object.keys(grammar.symbols).map(
+        function(key) {return this[key]}, grammar.symbols);
     rs = rs.concat(grammar.tokens);
     rs.push([/^\s*()$/, new Symbol("(end)")]);
     this.recognizer = new Recognizer(rs);
