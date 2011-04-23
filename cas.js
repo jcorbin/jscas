@@ -32,7 +32,7 @@ Recognizer.prototype = {
         var match = this.regex.exec(input);
         if (! match) return null;
         for (var i=1; i<match.length; i++)
-            if (match[i] !== undefined) {
+            if (match[i] != undefined) {
                 var token = Object.create(this.recognizers[2*i-1]);
                 token.consumed = match[0].length;
                 token.value = match[i];
@@ -163,13 +163,13 @@ Grammar.Parser.prototype = {
     },
     "advance": function(expected) {
         this.token = this.recognize();
-        if (expected !== undefined && token.value != expected)
+        if (expected != undefined && token.value != expected)
             token.error("unexpected token, expecting " + expected);
         return this.token;
     },
     "take": function(expected) {
         var taken = this.token || this.recognize();
-        if (expected !== undefined && taken.value != expected)
+        if (expected != undefined && taken.value != expected)
             taken.error("unexpected taken, expecting " + expected);
         this.token = this.recognize();
         return taken;
