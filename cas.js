@@ -84,6 +84,10 @@ function Symbol(id, bp, nud, led) {
     this.merge(bp, nud, led);
 }
 Symbol.prototype = {
+    "recognizer": function() {
+        return this.regex ? this.regex
+            : new RegExp("^\\s*(" + regex_escape(this.id) + ")");
+    },
     "merge": function(bp, nud, led) {
         if (bp && bp > this.bp)
             this.bp = bp;
@@ -113,7 +117,7 @@ function Grammar() {
 
 Grammar.Parser = function(grammar, input) {
     var rs = Object.keys(grammar.symbols).map(function(key) {
-        return [new RegExp("^\\s*("+regex_escape(key)+")"), this[key]];
+        return [this[key].recognizer(), this[key]];
     }, grammar.symbols);
     rs = rs.concat(grammar.tokens);
     this.recognizer = new Recognizer(rs);
