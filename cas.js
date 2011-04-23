@@ -228,7 +228,7 @@ Grammar.prototype = {
         }
         var s = this.symbols[id];
         if (! s)
-            this.symbols[id] = s = new Symbol(id, null, bp, nud, led);
+            this.symbols[id] = s = new Symbol(id, id, bp, nud, led);
         else
             s.merge(bp, nud, led);
         return s;
@@ -400,7 +400,7 @@ function BinaryOperator(symbol_id, bp, associative, commutative) {
     this.associative = associative;
     this.commutative = commutative;
     this.rbp = bp;
-    this.symbol = new Symbol(symbol_id, null, bp, null, this.led.bind(this));
+    this.symbol = new Symbol(symbol_id, symbol_id, bp, null, this.led.bind(this));
     this.symbol.op = this;
 
     this.expression = extend(Array, function() {
