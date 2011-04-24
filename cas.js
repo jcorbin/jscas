@@ -114,7 +114,7 @@ function Grammar() {
 Grammar.Parser = function(grammar, input) {
     var rs = grammar.symbols;
     rs = rs.concat(grammar.tokens);
-    rs.push(new Symbol(/^\s*()$/));
+    rs.push(new Token(/^\s*()$/));
     this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
@@ -206,7 +206,7 @@ Grammar.make_postfix_led = function(bp) {
 
 Grammar.prototype = {
     "token": function(token, regex, nud) {
-        var sym = new Symbol(regex, 0, nud);
+        var sym = new Token(regex, 0, nud);
         this.tokens.push(sym);
         return sym;
     },
