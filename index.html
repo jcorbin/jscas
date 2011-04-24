@@ -31,7 +31,8 @@
                     if (e.keyIdentifier != "Enter") return;
                     mess.innerText = "Parsing...";
                     try {
-                        result(grammar.parse(inp.value).toString());
+                        var expr = grammar.parse(inp.value);
+                        result(expr.toString());
                         mess.innerText = "";
                     } catch(err) {
                         switch (err.name) {
