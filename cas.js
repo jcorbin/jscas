@@ -424,7 +424,15 @@ BinaryOperator.Expression = extend(Array, function() {
         this.push(arguments[i]);
 }, {
     "toString": function() {
-        return this.join(" " + this.symbol + " ");
+        return this
+            .map(function(arg) {
+                if (arg instanceof BinaryOperator.Expression
+                    && this.bp >= arg.op.symbol.bp)
+                    return "(" + arg + ")";
+                else
+                    return arg;
+            }, this.op.symbol)
+            .join(" " + this.symbol + " ");
     },
     "toJSON": function() {
         var a = [this.symbol];
