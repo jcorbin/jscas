@@ -400,20 +400,11 @@ function BinaryOperator(symbol, bp, associative, commutative) {
     this.symbol = new Symbol(symbol, bp, null, this.led.bind(this));
     this.symbol.op = this;
 
-    this.expression = extend(Array, function() {
-        for (var i=0; i<arguments.length; i++)
-            this.push(arguments[i]);
+    this.expression = extend(BinaryOperator.Expression, function() {
+        BinaryOperator.Expression.apply(this, arguments);
     }, {
         "symbol": symbol,
-        "op": this,
-        "toString": function() {
-            return this.join(" " + this.symbol + " ");
-        },
-        "toJSON": function() {
-            var a = [this.symbol];
-            for (var i=0; i<this.length; i++) a.push(this[i]);
-            return a;
-        }
+        "op": this
     });
 }
 BinaryOperator.prototype = {
@@ -428,6 +419,19 @@ BinaryOperator.prototype = {
         return left;
     }
 };
+BinaryOperator.Expression = extend(Array, function() {
+    for (var i=0; i<arguments.length; i++)
+        this.push(arguments[i]);
+}, {
+    "toString": function() {
+        return this.join(" " + this.symbol + " ");
+    },
+    "toJSON": function() {
+        var a = [this.symbol];
+        for (var i=0; i<this.length; i++) a.push(this[i]);
+        return a;
+    }
+});
 
 var Arithmetic = new Grammar();
 Arithmetic.symbol(")");
