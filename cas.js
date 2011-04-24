@@ -222,7 +222,7 @@ Grammar.prototype = {
     },
 
     "symbol": function(symbol, bp, nud, led) {
-        var s = new Symbol(symbol, symbol, bp, nud, led);
+        var s = new Symbol(symbol, bp, nud, led);
         this.symbols.push(s);
         return s;
     },
