@@ -23,10 +23,7 @@ var regex_escape = function(text) {
 function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
-        if (r instanceof Symbol)
-            this.push(r.regex, r);
-        else
-            this.push(r[0], r[1]);
+        this.push(r.regex, r);
     }, this.recognizers);
     this.update();
 }
