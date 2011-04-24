@@ -80,7 +80,6 @@ Recognizer.prototype = {
 };
 
 // Note, symbol instances are set as the prototype of tokens which have the following properties:
-//   type   the type of the token, set by recognizer
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
 function Symbol(regex, bp, nud, led) {
