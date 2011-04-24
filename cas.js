@@ -83,18 +83,10 @@ function Symbol(regex, bp, nud, led) {
     if (typeof regex == "string")
         regex = new RegExp("^\\s*(" + regex_escape(regex) + ")");
     this.regex = regex;
-    this.merge(bp, nud, led);
+    if (bp && bp > this.bp) this.bp = bp;
+    if (nud) this.nud = nud;
+    if (led) this.led = led;
 }
-Symbol.prototype = {
-    "merge": function(bp, nud, led) {
-        if (bp && bp > this.bp)
-            this.bp = bp;
-        if (nud)
-            this.nud = nud;
-        if (led)
-            this.led = led;
-        return this;
-    },
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
