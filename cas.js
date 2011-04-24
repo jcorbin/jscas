@@ -76,17 +76,17 @@ Recognizer.prototype = {
     }
 };
 
-// Note, symbol instances are set as the prototype of tokens which have the following properties:
+// Note, Token instances are set as the prototype which then have the following
+// properties added:
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-function Symbol(regex, bp, nud, led) {
-    if (typeof regex == "string")
-        regex = new RegExp("^\\s*(" + regex_escape(regex) + ")");
+function Token(regex, bp, nud, led) {
     this.regex = regex;
     if (bp && bp > this.bp) this.bp = bp;
     if (nud) this.nud = nud;
     if (led) this.led = led;
 }
+Token.prototype = {
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -98,6 +98,13 @@ function Symbol(regex, bp, nud, led) {
         this.error("unexpected token");
     }
 };
+
+var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
+    this.symbol = symbol;
+    Token.call(this,
+        new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
+        bp, nud, led);
+});
 
 function Grammar() {
     this.tokens = [];
