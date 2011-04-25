@@ -205,15 +205,15 @@ Grammar.make_postfix_led = function(bp) {
 };
 
 Grammar.prototype = {
+    "parse": function(input) {
+        var parser = new Grammar.Parser(this, input);
+        return parser.expression();
+    },
+
     "token": function(token, regex, nud) {
         var sym = new Token(regex, 0, nud);
         this.tokens.push(sym);
         return sym;
-    },
-
-    "parse": function(input) {
-        var parser = new Grammar.Parser(this, input);
-        return parser.expression();
     },
 
     "symbol": function(symbol, bp, nud, led) {
