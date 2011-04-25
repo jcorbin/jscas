@@ -211,9 +211,9 @@ Grammar.prototype = {
     },
 
     "token": function(token, regex, nud) {
-        var sym = new Token(regex, 0, nud);
-        this.tokens.push(sym);
-        return sym;
+        var token = new Token(regex, 0, nud);
+        this.tokens.push(token);
+        return token;
     },
 
     "symbol": function(symbol, bp, nud, led) {
