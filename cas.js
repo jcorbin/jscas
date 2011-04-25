@@ -107,14 +107,15 @@ var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
 });
 
 function Grammar() {
-    this.tokens = [];
+    this.tokens = [
+        (new Token(/^\s*()$/))
+    ];
     this.symbols = [];
 }
 
 Grammar.Parser = function(grammar, input) {
     var rs = grammar.symbols;
     rs = rs.concat(grammar.tokens);
-    rs.push(new Token(/^\s*()$/));
     this.recognizer = new Recognizer(rs);
     this.input = this.working = input;
 };
@@ -212,7 +213,7 @@ Grammar.prototype = {
 
     "token": function(token, regex, nud) {
         var token = new Token(regex, 0, nud);
-        this.tokens.push(token);
+        this.tokens.splice(-1, 0, token);
         return token;
     },
 
