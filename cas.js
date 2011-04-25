@@ -16,6 +16,75 @@ function extend(base, constructor, props) {
     return constructor;
 }
 
+function Parser(recognizer, input) {
+    this.recognizer = recognizer;
+    this.input = this.working = input;
+};
+Parser.prototype = {
+    "position": 0,
+    "token": null,
+    "emptyRe": /^\s*$/,
+    // error(message, start, end) // error about a range
+    // error(message, start)      // end = end of string
+    // error(message)             // if token, error about it, otherwise
+    //                            // position to end of input
+    "error": function(message, start, end) {
+        var err = new Error(message);
+        err.name = 'CAS.ParseError';
+        err.input = this.input;
+        err.start = start || this.position;
+        err.end = end || this.input.length-1;
+        throw err;
+    },
+    "error_context": function(start, end) {
+        return function(message) {
+            this.error(message, start, end);
+        }.bind(this);
+    },
+    "recognize": function(recognizer) {
+        recognizer = recognizer || this.recognizer;
+        if (this.working == null) return null;
+        var token = recognizer.recognize(this.working) || null;
+        if (token) {
+            var consumed = token.consumed,
+                end = this.position + consumed;
+            delete token.consumed;
+            token.error = this.error_context(
+                this.position + consumed - token.value.length,
+                this.position + consumed
+            );
+            this.working = this.working.length
+                ? this.working.substr(consumed) : null;
+            this.position = end;
+        } else {
+            if (! this.emptyRe.test(this.working))
+                this.error("unrecognized input");
+            this.working = null;
+        }
+        return token;
+    },
+    "advance": function(expected) {
+        this.token = this.recognize();
+        if (expected != undefined && token.value != expected)
+            token.error("unexpected token, expecting " + expected);
+        return this.token;
+    },
+    "take": function(expected) {
+        var taken = this.token || this.recognize();
+        if (expected != undefined && taken.value != expected)
+            taken.error("unexpected taken, expecting " + expected);
+        this.token = this.recognize();
+        return taken;
+    },
+    "expression": function(bp) {
+        bp = bp || 0;
+        var left = this.take().nud(this);
+        while (bp < this.token.bp)
+            left = this.take().led(this, left);
+        return left;
+    }
+};
+
 var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
@@ -113,75 +182,6 @@ function Grammar() {
     this.symbols = [];
 }
 
-Grammar.Parser = function(recognizer, input) {
-    this.recognizer = recognizer;
-    this.input = this.working = input;
-};
-Grammar.Parser.prototype = {
-    "position": 0,
-    "token": null,
-    "emptyRe": /^\s*$/,
-    // error(message, start, end) // error about a range
-    // error(message, start)      // end = end of string
-    // error(message)             // if token, error about it, otherwise
-    //                            // position to end of input
-    "error": function(message, start, end) {
-        var err = new Error(message);
-        err.name = 'CAS.ParseError';
-        err.input = this.input;
-        err.start = start || this.position;
-        err.end = end || this.input.length-1;
-        throw err;
-    },
-    "error_context": function(start, end) {
-        return function(message) {
-            this.error(message, start, end);
-        }.bind(this);
-    },
-    "recognize": function(recognizer) {
-        recognizer = recognizer || this.recognizer;
-        if (this.working == null) return null;
-        var token = recognizer.recognize(this.working) || null;
-        if (token) {
-            var consumed = token.consumed,
-                end = this.position + consumed;
-            delete token.consumed;
-            token.error = this.error_context(
-                this.position + consumed - token.value.length,
-                this.position + consumed
-            );
-            this.working = this.working.length
-                ? this.working.substr(consumed) : null;
-            this.position = end;
-        } else {
-            if (! this.emptyRe.test(this.working))
-                this.error("unrecognized input");
-            this.working = null;
-        }
-        return token;
-    },
-    "advance": function(expected) {
-        this.token = this.recognize();
-        if (expected != undefined && token.value != expected)
-            token.error("unexpected token, expecting " + expected);
-        return this.token;
-    },
-    "take": function(expected) {
-        var taken = this.token || this.recognize();
-        if (expected != undefined && taken.value != expected)
-            taken.error("unexpected taken, expecting " + expected);
-        this.token = this.recognize();
-        return taken;
-    },
-    "expression": function(bp) {
-        bp = bp || 0;
-        var left = this.take().nud(this);
-        while (bp < this.token.bp)
-            left = this.take().led(this, left);
-        return left;
-    }
-};
-
 Grammar.make_infix_led = function(bp) {
     return function(parser, left) {
         var expr = parser.expression(bp);
@@ -205,7 +205,7 @@ Grammar.make_postfix_led = function(bp) {
 
 Grammar.prototype = {
     "parse": function(input) {
-        var parser = new Grammar.Parser(new Recognizer(
+        var parser = new Parser(new Recognizer(
             this.symbols.concat(this.tokens)), input);
         return parser.expression();
     },
