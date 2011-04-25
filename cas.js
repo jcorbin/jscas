@@ -113,10 +113,8 @@ function Grammar() {
     this.symbols = [];
 }
 
-Grammar.Parser = function(grammar, input) {
-    var rs = grammar.symbols;
-    rs = rs.concat(grammar.tokens);
-    this.recognizer = new Recognizer(rs);
+Grammar.Parser = function(recognizer, input) {
+    this.recognizer = recognizer;
     this.input = this.working = input;
 };
 Grammar.Parser.prototype = {
@@ -207,7 +205,8 @@ Grammar.make_postfix_led = function(bp) {
 
 Grammar.prototype = {
     "parse": function(input) {
-        var parser = new Grammar.Parser(this, input);
+        var parser = new Grammar.Parser(new Recognizer(
+            this.symbols.concat(this.tokens)), input);
         return parser.expression();
     },
 
