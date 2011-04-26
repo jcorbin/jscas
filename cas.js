@@ -176,16 +176,15 @@ Recognizer.prototype = {
 };
 
 function Grammar() {
+    this.first_token = -1;
     this.tokens = [
         (new Token(/^\s*()$/))
     ];
-    this.symbols = [];
 }
 
 Grammar.prototype = {
     "parse": function(input) {
-        var parser = new Parser(new Recognizer(
-            this.symbols.concat(this.tokens)), input);
+        var parser = new Parser(new Recognizer(this.tokens), input);
         return parser.expression();
     },
 
@@ -197,13 +196,15 @@ Grammar.prototype = {
 
     "symbol": function(symbol, bp, nud, led) {
         var symbol = new Symbol(symbol, bp, nud, led);
-        this.symbols.push(symbol);
+        this.tokens.splice(this.first_token, 0, symbol);
+        this.first_token++;
         return symbol;
     },
 
     "operator": function(symbol, bp, a, c) {
         var op = new BinaryOperator(symbol, bp, a, c);
-        this.symbols.push(op);
+        this.tokens.splice(this.first_token, 0, op);
+        this.first_token++;
         return op;
     }
 };
