@@ -44,7 +44,7 @@ Parser.prototype = {
     "recognize": function(recognizer) {
         recognizer = recognizer || this.recognizer;
         if (this.working == null) return null;
-        var token = recognizer.recognize(this.working) || null;
+        var token = recognizer(this.working) || null;
         if (token) {
             var consumed = token.consumed,
                 end = this.position + consumed;
@@ -187,7 +187,7 @@ Grammar.prototype = {
     "parse": function(input) {
         if (! this.recognizer)
             this.recognizer = new Recognizer(this.tokens);
-        var parser = new Parser(this.recognizer, input);
+        var parser = new Parser(this.recognizer.recognize.bind(this.recognizer), input);
         return parser.expression();
     },
 
