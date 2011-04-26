@@ -129,7 +129,7 @@ Recognizer.prototype = {
         if (! match) return null;
         for (var i=1; i<match.length; i++)
             if (match[i] != undefined) {
-                var token = Object.create(this.recognizers[2*i-1]);
+                var token = Object.create(this.recognizers[i-1]);
                 token.consumed = match[0].length;
                 token.value = match[i];
                 return token;
@@ -137,13 +137,13 @@ Recognizer.prototype = {
         return null;
     },
     "add": function(recognizer) {
-        this.recognizers.push(recognizer.regex, recognizer);
+        this.recognizers.push(recognizer);
         this.update();
     },
     "update": function() {
         var rs = [], i = -1, curws = false;
-        for (var j=0; j<this.recognizers.length; j+=2) {
-            var s = this.recognizers[j].source,
+        for (var j=0; j<this.recognizers.length; j+=1) {
+            var s = this.recognizers[j].regex.source,
                 ws = s.substr(0, 4) == "^\\s*";
             if (ws) {
                 if (ws != curws) {
