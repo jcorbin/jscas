@@ -157,23 +157,27 @@ Recognizer.prototype = {
         this.update();
     },
     "update": function() {
-        var rs = this.recognizers.map(function(r) {return r.regex.source});
-        rs = rs.groupby(rs, function(s) {
-            var s = s.substr(0, 4);
-            return s == "^\\s*" ? s : null;
-        });
-        rs = rs.map(function(group) {
-            var vals = group.vals.join("|");
-            if (group.key)
-                vals = group.key + "(?:" + vals + ")";
-            return vals;
-        });
-        if (rs.length > 1)
-            rs = "(?:" + rs.join("|") + ")";
-        else
-            rs = rs[0];
-        this.regex = new RegExp(rs);
+        this.regex = Recognizer.compile(this.recognizers);
     }
+};
+Recognizer.compile = function(recognizers) {
+    var rs = recognizers.map(function(r) {return r.regex.source});
+    rs = groupby(rs, function(s) {
+        s = s.substr(0, 4);
+        return s == "^\\s*" ? s : null;
+    });
+    rs = rs.map(function(group) {
+        var vals = group.vals.join("|");
+        if (group.key)
+            vals = group.key + "(?:" + vals + ")";
+        return vals;
+    });
+    if (rs.length > 1)
+        rs = "(?:" + rs.join("|") + ")";
+    else
+        rs = rs[0];
+    rs = new RegExp(rs)
+    return rs;
 };
 
 function Grammar() {
