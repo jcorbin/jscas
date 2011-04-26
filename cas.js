@@ -89,6 +89,36 @@ var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
+// Note, Token instances are set as the prototype which then have the following
+// properties added:
+//   value  the contents of the token, set by recognizer
+//   error  error reporting function, set by lexer
+function Token(regex, bp, nud, led) {
+    this.regex = regex;
+    if (bp && bp > this.bp) this.bp = bp;
+    if (nud) this.nud = nud;
+    if (led) this.led = led;
+}
+Token.prototype = {
+    // BP:  Binding Power (infix)
+    "bp":  0,
+    // NUD: NUll left Denotation, operator has nothing to its left (prefix)
+    "nud": function(parser) {
+        this.error("syntax error");
+    },
+    // LED: LEft Denotation, op has something to left (postfix or infix)
+    "led": function(parser, left) {
+        this.error("unexpected token");
+    }
+};
+
+var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
+    this.symbol = symbol;
+    Token.call(this,
+        new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
+        bp, nud, led);
+});
+
 function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(function(r) {
@@ -144,36 +174,6 @@ Recognizer.prototype = {
         this.regex = new RegExp(rs);
     }
 };
-
-// Note, Token instances are set as the prototype which then have the following
-// properties added:
-//   value  the contents of the token, set by recognizer
-//   error  error reporting function, set by lexer
-function Token(regex, bp, nud, led) {
-    this.regex = regex;
-    if (bp && bp > this.bp) this.bp = bp;
-    if (nud) this.nud = nud;
-    if (led) this.led = led;
-}
-Token.prototype = {
-    // BP:  Binding Power (infix)
-    "bp":  0,
-    // NUD: NUll left Denotation, operator has nothing to its left (prefix)
-    "nud": function(parser) {
-        this.error("syntax error");
-    },
-    // LED: LEft Denotation, op has something to left (postfix or infix)
-    "led": function(parser, left) {
-        this.error("unexpected token");
-    }
-};
-
-var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
-    this.symbol = symbol;
-    Token.call(this,
-        new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
-        bp, nud, led);
-});
 
 function Grammar() {
     this.tokens = [
