@@ -121,10 +121,7 @@ var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
 
 function Recognizer(recognizers) {
     this.recognizers = [];
-    recognizers.forEach(function(r) {
-        this.push(r.regex, r);
-    }, this.recognizers);
-    this.update();
+    recognizers.forEach(this.add, this);
 }
 Recognizer.prototype = {
     "recognize": function(input) {
