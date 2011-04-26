@@ -16,6 +16,26 @@ function extend(base, constructor, props) {
     return constructor;
 }
 
+var regex_escape = function(text) {
+    return text.replace(this, "\\$&");
+}.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
+
+function groupby(vals, key) {
+    var r = [], buf = [], i = -1, cur = null;
+    vals.forEach(function(val) {
+        var kv = key(val);
+        if (kv != cur) {
+            if (buf.length)
+                r.push({"key": cur, "vals": buf});
+            cur = kv;
+            buf = [];
+        }
+        buf.push(val);
+    });
+    r.push({"key": cur, "vals": buf});
+    return r;
+}
+
 function Parser(recognizer, input) {
     this.recognizer = recognizer;
     this.input = this.working = input;
@@ -85,10 +105,6 @@ Parser.prototype = {
     }
 };
 
-var regex_escape = function(text) {
-    return text.replace(this, "\\$&");
-}.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
-
 // Note, Token instances are set as the prototype which then have the following
 // properties added:
 //   value  the contents of the token, set by recognizer
@@ -118,22 +134,6 @@ var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
         new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
         bp, nud, led);
 });
-
-function groupby(vals, key) {
-    var r = [], buf = [], i = -1, cur = null;
-    vals.forEach(function(val) {
-        var kv = key(val);
-        if (kv != cur) {
-            if (buf.length)
-                r.push({"key": cur, "vals": buf});
-            cur = kv;
-            buf = [];
-        }
-        buf.push(val);
-    });
-    r.push({"key": cur, "vals": buf});
-    return r;
-}
 
 function Grammar() {
     this.first_token = -1;
