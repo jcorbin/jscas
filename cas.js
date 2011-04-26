@@ -136,19 +136,9 @@ function groupby(vals, key) {
 }
 
 function Recognizer(recognizers) {
-    this.recognizers = [];
-    recognizers.forEach(this.add, this);
+    return Recognizer.match.bind(
+        Recognizer.compile(recognizers));
 }
-Recognizer.prototype = {
-    "add": function(recognizer) {
-        this.recognizers.push(recognizer);
-        this.update();
-    },
-    "update": function() {
-        this.recognize = Recognizer.match.bind(
-            Recognizer.compile(this.recognizers));
-    }
-};
 Recognizer.compile = function(recognizers) {
     var rs = recognizers.map(function(r) {return r.regex.source});
     rs = groupby(rs, function(s) {
@@ -193,8 +183,8 @@ Grammar.prototype = {
     "recognizer": null,
     "parse": function(input) {
         if (! this.recognizer)
-            this.recognizer = new Recognizer(this.tokens);
-        var parser = new Parser(this.recognizer.recognize.bind(this.recognizer), input);
+            this.recognizer = Recognizer(this.tokens);
+        var parser = new Parser(this.recognizer, input);
         return parser.expression();
     },
 
