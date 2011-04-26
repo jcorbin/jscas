@@ -137,10 +137,7 @@ Recognizer.prototype = {
         return null;
     },
     "add": function(recognizer) {
-        if (recognizer instanceof Token)
-            this.recognizers.push(recognizer.regex, recognizer);
-        else if (recognizer instanceof Recognizer)
-            this.recognizers = this.recognizers.concat(recognizer.recognizers);
+        this.recognizers.push(recognizer.regex, recognizer);
         this.update();
     },
     "update": function() {
