@@ -119,6 +119,22 @@ var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
         bp, nud, led);
 });
 
+function groupby(vals, key) {
+    var r = [], buf = [], i = -1, cur = null;
+    vals.forEach(function(val) {
+        var kv = key(val);
+        if (kv != cur) {
+            if (buf.length)
+                r.push({"key": cur, "vals": buf});
+            cur = kv;
+            buf = [];
+        }
+        buf.push(val);
+    });
+    r.push({"key": cur, "vals": buf});
+    return r;
+}
+
 function Recognizer(recognizers) {
     this.recognizers = [];
     recognizers.forEach(this.add, this);
