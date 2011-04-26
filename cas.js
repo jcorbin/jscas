@@ -440,11 +440,11 @@ var BinaryOperator = extend(Operator, function(symbol, bp, associative, commutat
 
 var Arithmetic = new Grammar();
 Arithmetic.symbol(")");
-Arithmetic.prefix("(", 0, function(parser) {
+Arithmetic.symbol("(").nud = function(parser) {
     var expr = parser.expression();
     parser.take(")");
     return expr;
-});
+};
 Arithmetic.token("number", /^\s*(-?\d+(?:\.\d+)?(?:E-?\d+)?)/,
     function(parser) {
         var n = Number(this.value);
