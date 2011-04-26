@@ -183,14 +183,18 @@ function Grammar() {
 }
 
 Grammar.prototype = {
+    "recognizer": null,
     "parse": function(input) {
-        var parser = new Parser(new Recognizer(this.tokens), input);
+        if (! this.recognizer)
+            this.recognizer = new Recognizer(this.tokens);
+        var parser = new Parser(this.recognizer, input);
         return parser.expression();
     },
 
     "token": function(token, regex, nud) {
         var token = new Token(regex, 0, nud);
         this.tokens.splice(-1, 0, token);
+        delete this.recognizer;
         return token;
     },
 
@@ -198,6 +202,7 @@ Grammar.prototype = {
         var symbol = new Symbol(symbol, bp, nud, led);
         this.tokens.splice(this.first_token, 0, symbol);
         this.first_token++;
+        delete this.recognizer;
         return symbol;
     },
 
@@ -205,6 +210,7 @@ Grammar.prototype = {
         var op = new BinaryOperator(symbol, bp, a, c);
         this.tokens.splice(this.first_token, 0, op);
         this.first_token++;
+        delete this.recognizer;
         return op;
     }
 };
