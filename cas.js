@@ -139,8 +139,11 @@ Recognizer.prototype = {
             }
         return null;
     },
-    "add": function(regex, prototype) {
-        this.recognizers.push(regex, prototype);
+    "add": function(recognizer) {
+        if (recognizer instanceof Token)
+            this.recognizers.push(recognizer.regex, recognizer);
+        else if (recognizer instanceof Recognizer)
+            this.recognizers = this.recognizers.concat(recognizer.recognizers);
         this.update();
     },
     "update": function() {
