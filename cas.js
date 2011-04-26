@@ -182,27 +182,6 @@ function Grammar() {
     this.symbols = [];
 }
 
-Grammar.make_infix_led = function(bp) {
-    return function(parser, left) {
-        var expr = parser.expression(bp);
-        if (Array.isArray(left) && left[0] == this.value)
-            left.push(expr);
-        else
-            left = [this.value, left, expr];
-        return left;
-    };
-};
-Grammar.make_prefix_nud = function(bp) {
-    return function(parser) {
-        return [this.value, parser.expression(bp)];
-    };
-};
-Grammar.make_postfix_led = function(bp) {
-    return function(parser, left) {
-        return [this.value, left];
-    };
-};
-
 Grammar.prototype = {
     "parse": function(input) {
         var parser = new Parser(new Recognizer(
@@ -226,34 +205,6 @@ Grammar.prototype = {
         var op = new BinaryOperator(symbol, bp, a, c);
         this.symbols.push(op);
         return op;
-    },
-
-    "prefix": function(symbol, bp, nud) {
-        if (! (symbol instanceof Symbol))
-            symbol = this.symbol(symbol);
-        symbol.nud = nud || Grammar.make_prefix_nud(bp);
-        return symbol;
-    },
-
-    "postfix": function(symbol, bp, led) {
-        if (! (symbol instanceof Symbol))
-            symbol = this.symbol(symbol, bp);
-        symbol.led = led || Grammar.make_postfix_led(bp);
-        return symbol;
-    },
-
-    "infixl": function(symbol, bp, led) {
-        if (! (symbol instanceof Symbol))
-            symbol = this.symbol(symbol, bp);
-        symbol.led = led || Grammar.make_infix_led(bp);
-        return symbol;
-    },
-
-    "infixr": function(symbol, bp, led) {
-        if (! (symbol instanceof Symbol))
-            symbol = this.symbol(symbol, bp);
-        symbol.led = led || Grammar.make_infix_led(bp - 1);
-        return symbol;
     }
 };
 
