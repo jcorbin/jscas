@@ -196,9 +196,9 @@ Grammar.prototype = {
     },
 
     "symbol": function(symbol, bp, nud, led) {
-        var s = new Symbol(symbol, bp, nud, led);
-        this.symbols.push(s);
-        return s;
+        var symbol = new Symbol(symbol, bp, nud, led);
+        this.symbols.push(symbol);
+        return symbol;
     },
 
     "operator": function(symbol, bp, a, c) {
