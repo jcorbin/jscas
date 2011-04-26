@@ -140,24 +140,13 @@ function Recognizer(recognizers) {
     recognizers.forEach(this.add, this);
 }
 Recognizer.prototype = {
-    "recognize": function(input) {
-        var match = this.regex.exec(input);
-        if (! match) return null;
-        for (var i=1; i<match.length; i++)
-            if (match[i] != undefined) {
-                var token = Object.create(this.recognizers[i-1]);
-                token.consumed = match[0].length;
-                token.value = match[i];
-                return token;
-            }
-        return null;
-    },
     "add": function(recognizer) {
         this.recognizers.push(recognizer);
         this.update();
     },
     "update": function() {
-        this.regex = Recognizer.compile(this.recognizers);
+        this.recognize = Recognizer.match.bind(
+            Recognizer.compile(this.recognizers));
     }
 };
 Recognizer.compile = function(recognizers) {
@@ -177,7 +166,20 @@ Recognizer.compile = function(recognizers) {
     else
         rs = rs[0];
     rs = new RegExp(rs)
+    rs.recognizers = recognizers;
     return rs;
+};
+Recognizer.match = function(input) {
+    var match = this.exec(input);
+    if (! match) return null;
+    for (var i=1; i<match.length; i++)
+        if (match[i] != undefined) {
+            var token = Object.create(this.recognizers[i-1]);
+            token.consumed = match[0].length;
+            token.value = match[i];
+            return token;
+        }
+    return null;
 };
 
 function Grammar() {
