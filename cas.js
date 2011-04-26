@@ -157,28 +157,16 @@ Recognizer.prototype = {
         this.update();
     },
     "update": function() {
-        var rs = [], i = -1, curws = false;
-        for (var j=0; j<this.recognizers.length; j+=1) {
-            var s = this.recognizers[j].regex.source,
-                ws = s.substr(0, 4) == "^\\s*";
-            if (ws) {
-                if (ws != curws) {
-                    rs.push([]);
-                    i++;
-                    rs[i].prefix = s.substr(0, 4);
-                }
-                rs[i].push(s.substr(4));
-            } else {
-                rs.push(s);
-                i++;
-            }
-            curws = ws;
-        }
-        rs = rs.map(function(r) {
-            if (Array.isArray(r))
-                return r.prefix + "(?:" + r.join("|") + ")";
-            else
-                return r;
+        var rs = this.recognizers.map(function(r) {return r.regex.source});
+        rs = rs.groupby(rs, function(s) {
+            var s = s.substr(0, 4);
+            return s == "^\\s*" ? s : null;
+        });
+        rs = rs.map(function(group) {
+            var vals = group.vals.join("|");
+            if (group.key)
+                vals = group.key + "(?:" + vals + ")";
+            return vals;
         });
         if (rs.length > 1)
             rs = "(?:" + rs.join("|") + ")";
