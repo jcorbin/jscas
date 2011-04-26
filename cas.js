@@ -135,43 +135,6 @@ function groupby(vals, key) {
     return r;
 }
 
-function Recognizer(recognizers) {
-    return Recognizer.match.bind(
-        Recognizer.compile(recognizers));
-}
-Recognizer.compile = function(recognizers) {
-    var rs = recognizers.map(function(r) {return r.regex.source});
-    rs = groupby(rs, function(s) {
-        s = s.substr(0, 4);
-        return s == "^\\s*" ? s : null;
-    });
-    rs = rs.map(function(group) {
-        var vals = group.vals.join("|");
-        if (group.key)
-            vals = group.key + "(?:" + vals + ")";
-        return vals;
-    });
-    if (rs.length > 1)
-        rs = "(?:" + rs.join("|") + ")";
-    else
-        rs = rs[0];
-    rs = new RegExp(rs)
-    rs.recognizers = recognizers;
-    return rs;
-};
-Recognizer.match = function(input) {
-    var match = this.exec(input);
-    if (! match) return null;
-    for (var i=1; i<match.length; i++)
-        if (match[i] != undefined) {
-            var token = Object.create(this.recognizers[i-1]);
-            token.consumed = match[0].length;
-            token.value = match[i];
-            return token;
-        }
-    return null;
-};
-
 function Grammar() {
     this.first_token = -1;
     this.tokens = [
@@ -180,11 +143,42 @@ function Grammar() {
 }
 
 Grammar.prototype = {
-    "recognizer": null,
+    "compile": function() {
+        var rs = this.tokens.map(function(r) {return r.regex.source});
+        rs = groupby(rs, function(s) {
+            s = s.substr(0, 4);
+            return s == "^\\s*" ? s : null;
+        });
+        rs = rs.map(function(group) {
+            var vals = group.vals.join("|");
+            if (group.key)
+                vals = group.key + "(?:" + vals + ")";
+            return vals;
+        });
+        if (rs.length > 1)
+            rs = "(?:" + rs.join("|") + ")";
+        else
+            rs = rs[0];
+        this.regex = new RegExp(rs)
+    },
+
+    "recognize": function(input) {
+        var match = this.regex.exec(input);
+        if (! match) return null;
+        for (var i=1; i<match.length; i++)
+            if (match[i] != undefined) {
+                var token = Object.create(this.tokens[i-1]);
+                token.consumed = match[0].length;
+                token.value = match[i];
+                return token;
+            }
+        return null;
+    },
+
     "parse": function(input) {
-        if (! this.recognizer)
-            this.recognizer = Recognizer(this.tokens);
-        var parser = new Parser(this.recognizer, input);
+        if (! this.regex)
+            this.compile();
+        var parser = new Parser(this.recognize.bind(this), input);
         return parser.expression();
     },
 
