@@ -169,27 +169,29 @@ Grammar.prototype = {
         return parser.expression();
     },
 
-    "token": function(token, regex, nud) {
-        var token = new Token(regex, 0, nud);
+    "addToken": function(token) {
         this.tokens.splice(-1, 0, token);
         delete this.recognizer;
         return token;
     },
 
-    "symbol": function(symbol, bp, nud, led) {
-        var symbol = new Symbol(symbol, bp, nud, led);
+    "addSymbol": function(symbol) {
         this.tokens.splice(this.first_token, 0, symbol);
         this.first_token++;
         delete this.recognizer;
         return symbol;
     },
 
+    "token": function(token, regex, nud) {
+        return this.addToken(new Token(regex, 0, nud));
+    },
+
+    "symbol": function(symbol, bp, nud, led) {
+        return this.addSymbol(new Symbol(symbol, bp, nud, led));
+    },
+
     "operator": function(symbol, bp, a, c) {
-        var op = new BinaryOperator(symbol, bp, a, c);
-        this.tokens.splice(this.first_token, 0, op);
-        this.first_token++;
-        delete this.recognizer;
-        return op;
+        return this.addSymbol(new BinaryOperator(symbol, bp, a, c));
     }
 };
 
