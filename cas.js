@@ -2,20 +2,6 @@
 
 var CAS = (function() {
 
-function mixin(target, props) {
-    for (var i=0, l=Object.keys(props); i<l.length; i++)
-        target[l[i]] = props[l[i]];
-    return target;
-}
-
-function extend(base, constructor, props) {
-    var proto = constructor.prototype = Object.create(base.prototype);
-    proto.__constructor__ = constructor;
-    if (props)
-        mixin(proto, props)
-    return constructor;
-}
-
 var regex_escape = function(text) {
     return text.replace(this, "\\$&");
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
@@ -128,12 +114,13 @@ Token.prototype = {
     }
 };
 
-var Symbol = extend(Token, function Symbol(symbol, bp, nud, led) {
+function Symbol(symbol, bp, nud, led) {
     this.symbol = symbol;
     Token.call(this,
         new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
         bp, nud, led);
-});
+}
+Symbol.prototype = Object.create(Token.prototype);
 
 function Grammar() {
     this.first_token = -1;
@@ -337,29 +324,30 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-var Operator = extend(Symbol, function(symbol, bp, rbp) {
+function Operator(symbol, bp, rbp) {
     this.rbp = rbp == undefined ? bp : rbp;
     Symbol.call(this, symbol, bp);
 
-    this.expression = extend(Operator.Expression, function() {
+    this.expression = function() {
         Operator.Expression.apply(this, arguments);
-    }, {
-        "op": this
-    });
-});
+    }
+    this.expression.prototype = Object.create(Operator.Expression.prototype);
+    this.expression.prototype.op = this;
+}
+Operator.prototype = Object.create(Symbol.prototype);
 
-Operator.Expression = extend(Array, function() {
+Operator.Expression = function() {
     for (var i=0; i<arguments.length; i++)
         this.push(arguments[i]);
-}, {
-    "toJSON": function() {
-        var a = [this.op.symbol];
-        for (var i=0; i<this.length; i++) a.push(this[i]);
-        return a;
-    }
-});
+};
+Operator.Expression.prototype = Object.create(Array.prototype);
+Operator.Expression.prototype.toJSON = function() {
+    var a = [this.op.symbol];
+    for (var i=0; i<this.length; i++) a.push(this[i]);
+    return a;
+};
 
-var BinaryOperator = extend(Operator, function(symbol, bp, associative, commutative) {
+function BinaryOperator(symbol, bp, associative, commutative) {
     if (associative == undefined) this.associative = associative;
     if (commutative == undefined) this.commutative = commutative;
     Operator.call(this, symbol, bp);
@@ -374,18 +362,18 @@ var BinaryOperator = extend(Operator, function(symbol, bp, associative, commutat
             }, this.op)
             .join(" " + this.op.symbol + " ");
     };
-}, {
-    "associative": true,
-    "commutative": true,
-    "led": function(parser, left) {
-        var expr = parser.expression(this.rbp);
-        if (this.associative && left instanceof this.expression)
-            left.push(expr);
-        else
-            left = new this.expression(left, expr);
-        return left;
-    }
-});
+}
+BinaryOperator.prototype = Object.create(Operator.prototype);
+BinaryOperator.prototype.associative = true;
+BinaryOperator.prototype.commutative = true;
+BinaryOperator.prototype.led = function(parser, left) {
+    var expr = parser.expression(this.rbp);
+    if (this.associative && left instanceof this.expression)
+        left.push(expr);
+    else
+        left = new this.expression(left, expr);
+    return left;
+};
 
 var Arithmetic = new Grammar();
 Arithmetic.symbol(")");
