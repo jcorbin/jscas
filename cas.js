@@ -143,7 +143,7 @@ Grammar.prototype = {
             return vals;
         });
         if (rs.length > 1)
-            rs = "(?:" + rs.join("|") + ")";
+            rs = rs.join("|");
         else
             rs = rs[0];
         this.regex = new RegExp(rs)
