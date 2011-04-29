@@ -122,14 +122,13 @@ function Symbol(symbol, bp, nud, led) {
 }
 Symbol.prototype = Object.create(Token.prototype);
 
-function Grammar() {
+CAS.Grammar = function() {
     this.first_token = -1;
     this.tokens = [
         (new Token(/^\s*()$/))
     ];
 }
-
-Grammar.prototype = {
+CAS.Grammar.prototype = {
     "compile": function() {
         var rs = this.tokens.map(function(r) {return r.regex.source});
         rs = groupby(rs, function(s) {
@@ -377,7 +376,7 @@ BinaryOperator.prototype.led = function(parser, left) {
     return left;
 };
 
-var Arithmetic = new Grammar();
+var Arithmetic = new CAS.Grammar();
 Arithmetic.symbol(")");
 Arithmetic.symbol("(").nud = function(parser) {
     var expr = parser.expression();
@@ -398,7 +397,6 @@ Arithmetic.operator("-", 50).nud = function(parser) {
 Arithmetic.operator("*", 60);
 Arithmetic.operator("/", 60);
 
-CAS.Grammar = Grammar;
 CAS.RationalNumber = RationalNumber;
 CAS.Variable = Variable;
 CAS.BinaryOperator = BinaryOperator;
