@@ -8,3 +8,8 @@ input, select, textarea, button {
     color: #7e778e;
     border: 1px solid #7e778e;
 }
+
+header {
+    display: block;
+    text-align: right;
+}
