@@ -22,11 +22,11 @@ function groupby(vals, key) {
     return r;
 }
 
-function Parser(recognizer, input) {
+CAS.Parser = function(recognizer, input) {
     this.recognizer = recognizer;
     this.input = this.working = input;
 };
-Parser.prototype = {
+CAS.Parser.prototype = {
     "position": 0,
     "token": null,
     "emptyRe": /^\s*$/,
@@ -164,7 +164,7 @@ CAS.Grammar.prototype = {
     "parse": function(input) {
         if (! this.regex)
             this.compile();
-        var parser = new Parser(this.recognize.bind(this), input);
+        var parser = new CAS.Parser(this.recognize.bind(this), input);
         return parser.expression();
     },
 
