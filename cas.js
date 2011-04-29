@@ -95,13 +95,13 @@ CAS.Parser.prototype = {
 // properties added:
 //   value  the contents of the token, set by recognizer
 //   error  error reporting function, set by lexer
-function Token(regex, bp, nud, led) {
+CAS.Token = function(regex, bp, nud, led) {
     this.regex = regex;
     if (bp && bp > this.bp) this.bp = bp;
     if (nud) this.nud = nud;
     if (led) this.led = led;
 }
-Token.prototype = {
+CAS.Token.prototype = {
     // BP:  Binding Power (infix)
     "bp":  0,
     // NUD: NUll left Denotation, operator has nothing to its left (prefix)
@@ -116,16 +116,16 @@ Token.prototype = {
 
 function Symbol(symbol, bp, nud, led) {
     this.symbol = symbol;
-    Token.call(this,
+    CAS.Token.call(this,
         new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
         bp, nud, led);
 }
-Symbol.prototype = Object.create(Token.prototype);
+Symbol.prototype = Object.create(CAS.Token.prototype);
 
 CAS.Grammar = function() {
     this.first_token = -1;
     this.tokens = [
-        (new Token(/^\s*()$/))
+        (new CAS.Token(/^\s*()$/))
     ];
 }
 CAS.Grammar.prototype = {
@@ -182,7 +182,7 @@ CAS.Grammar.prototype = {
     },
 
     "token": function(token, regex, nud) {
-        return this.addToken(new Token(regex, 0, nud));
+        return this.addToken(new CAS.Token(regex, 0, nud));
     },
 
     "symbol": function(symbol, bp, nud, led) {
