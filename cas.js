@@ -78,7 +78,7 @@ Parser.prototype = {
     "take": function(expected) {
         var taken = this.token || this.recognize();
         if (expected != undefined && taken.value != expected)
-            taken.error("unexpected taken, expecting " + expected);
+            taken.error("unexpected token, expecting " + expected);
         this.token = this.recognize();
         return taken;
     },
