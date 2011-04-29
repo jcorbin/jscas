@@ -2,6 +2,14 @@
 
 window.CAS = (function(CAS) {
 
+/*
+ * The approach taken is an adaptation of Pratt parsing.
+ *
+ * Lexing is handled by each grammar token knowing how to recognize
+ * itself. Grammar then creates a specific token object using the
+ * registered token object as prototype.
+ */
+
 CAS.Parser = function(recognizer, input) {
     this.recognizer = recognizer;
     this.input = this.working = input;
@@ -71,10 +79,6 @@ CAS.Parser.prototype = {
     }
 };
 
-// Note, Token instances are set as the prototype which then have the following
-// properties added:
-//   value  the contents of the token, set by recognizer
-//   error  error reporting function, set by lexer
 CAS.Token = function(regex, bp, nud, led) {
     this.regex = regex;
     if (bp && bp > this.bp) this.bp = bp;
