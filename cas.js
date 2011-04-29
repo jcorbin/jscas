@@ -114,13 +114,13 @@ CAS.Token.prototype = {
     }
 };
 
-function Symbol(symbol, bp, nud, led) {
+CAS.Symbol = function(symbol, bp, nud, led) {
     this.symbol = symbol;
     CAS.Token.call(this,
         new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
         bp, nud, led);
 }
-Symbol.prototype = Object.create(CAS.Token.prototype);
+CAS.Symbol.prototype = Object.create(CAS.Token.prototype);
 
 CAS.Grammar = function() {
     this.first_token = -1;
@@ -186,7 +186,7 @@ CAS.Grammar.prototype = {
     },
 
     "symbol": function(symbol, bp, nud, led) {
-        return this.addSymbol(new Symbol(symbol, bp, nud, led));
+        return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
     },
 
     "operator": function(symbol, bp, a, c) {
@@ -327,7 +327,7 @@ Variable.prototype.toJSON = Variable.prototype.toString;
 
 function Operator(symbol, bp, rbp) {
     this.rbp = rbp == undefined ? bp : rbp;
-    Symbol.call(this, symbol, bp);
+    CAS.Symbol.call(this, symbol, bp);
 
     this.expression = function() {
         Operator.Expression.apply(this, arguments);
@@ -335,7 +335,7 @@ function Operator(symbol, bp, rbp) {
     this.expression.prototype = Object.create(Operator.Expression.prototype);
     this.expression.prototype.op = this;
 }
-Operator.prototype = Object.create(Symbol.prototype);
+Operator.prototype = Object.create(CAS.Symbol.prototype);
 
 Operator.Expression = function() {
     for (var i=0; i<arguments.length; i++)
