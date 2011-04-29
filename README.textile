@@ -1,3 +1,7 @@
 This is a toy CAS written in JavaScript.
 
 Currently all it does is create parse trees.
+
+Can play with it on the "homepage":http://jcorbin.github.com/jscas , let's just hope that I can remember to keep the gh-pages branch updated too.
+
+For reference, the parsing approach is an adaptation of "Pratt parsing":http://en.wikipedia.org/wiki/Vaughan_Pratt except that I've rolled the token generation directly into the parser.
