@@ -1,3 +1,5 @@
 This is a toy CAS written in JavaScript.
 
 Currently all it does is create parse trees.
+
+Can play with it on the "homepage":http://jcorbin.github.com/jscas , let's just hope that I can remember to keep the gh-pages branch updated too.
