@@ -1,6 +1,6 @@
 "use strict";
 
-var CAS = (function() {
+window.CAS = (function(CAS) {
 
 var regex_escape = function(text) {
     return text.replace(this, "\\$&");
@@ -398,11 +398,11 @@ Arithmetic.operator("-", 50).nud = function(parser) {
 Arithmetic.operator("*", 60);
 Arithmetic.operator("/", 60);
 
-return {
-    'Grammar': Grammar,
-    'RationalNumber': RationalNumber,
-    'Variable': Variable,
-    'BinaryOperator': BinaryOperator,
-    'Arithmetic': Arithmetic
-};
-})();
+CAS.Grammar = Grammar;
+CAS.RationalNumber = RationalNumber;
+CAS.Variable = Variable;
+CAS.BinaryOperator = BinaryOperator;
+CAS.Arithmetic = Arithmetic;
+
+return CAS;
+})(window.CAS || {});
