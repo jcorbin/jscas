@@ -1,0 +1,164 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>cas test</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <script src="parser.js" language="JavaScript"></script>
+        <script src="cas.js" language="JavaScript"></script>
+        <script src="plot.js" language="JavaScript"></script>
+        <style type="text/css">
+            #plot {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="plot"></canvas>
+        <script language="JavaScript">
+            (function () {
+                "use strict";
+
+                function colors(n, s, l) {
+                    s = (s * 100).toFixed(1) + '%';
+                    l = (l * 100).toFixed(1) + '%';
+                    var colors = [];
+                    for (var i=0; i<n; i++)
+                        colors.push("hsl("+[
+                            Math.floor(360*i/n).toString(), s, l
+                        ].join(", ")+")");
+                    return colors;
+                };
+
+                function partial_sum(f, s) {
+                    var r = 0;
+                    for (var n=1; n<=s; n++)
+                        r += f(n);
+                    return r;
+                }
+
+                function seq(from, to) {
+                    var s = [];
+                    for (var n=from; n<=to; n++)
+                        s.push(n);
+                    return s;
+                }
+
+                var XTFunction = {
+                    "add": function(f1, f2) {
+                        if (typeof f1 == 'number' && typeof f2 == 'number') {
+                            return f1 + f2;
+                        } else if (typeof f1 == 'number') {
+                            if (f1 == 0)
+                                return f2;
+                            else
+                                return function(x, t) {return f1 + f2(x, t)}
+                        } else if (typeof f2 == 'number') {
+                            return XTFunction.add(f2, f1);
+                        } else {
+                            return function(x, t) {return f1(x, t) + f2(x, t)}
+                        }
+                    },
+                    "mul": function(f1, f2) {
+                        if (typeof f1 == 'number' && typeof f2 == 'number') {
+                            return f1 * f2;
+                        } else if (typeof f1 == 'number') {
+                            if (f1 == 1)
+                                return f2;
+                            else if (f1 == 0)
+                                return 0;
+                            else
+                                return function(x, t) {return f1 * f2(x, t)}
+                        } else if (typeof f2 == 'number') {
+                            return function(x, t) {return f2 * f1(x, t)}
+                        } else {
+                            return function(x, t) {return f1(x, t) * f2(x, t)}
+                        }
+                    }
+                };
+
+                function old_wave(l, a, s) {
+                    return XTFunction.mul(
+                        l*l/ Math.pow(Math.PI, 3),
+                        seq(1, s).map(function(n) {
+                            var c1 = 2/Math.pow(n, 3);
+                            if (Math.round(c1) == 0) {
+                                return 0;
+                            } else {
+                                var c2 = n * Math.PI/l,
+                                    c3 = a * c2;
+                                return function(x, t) {
+                                    return c1 * Math.sin(c2 * x) * Math.cos(c3 * t);
+                                };
+                            }
+                        }).reduce(XTFunction.add)
+                    );
+                }
+
+                function memoize(f) {
+                    var cache = {};
+                    return function() {
+                        var key = "memo:";
+                        for (var i=0; i<arguments.length; i++)
+                            key += JSON.stringify(arguments[i])+",";
+                        if (key in cache)
+                            return cache[key];
+                        else
+                            return cache[key] = f.apply(this, arguments);
+                    }
+                }
+
+                function new_wave(l, a, s) {
+                    return XTFunction.mul(
+                        6 * Math.pow(Math.PI, 2),
+                        seq(1, s).map(memoize(function(n) {
+                            var npiot = n * Math.PI / 3,
+                                c1 = (Math.sin(2 * npiot) + Math.sin(npiot))/n;
+                            if (Math.round(c1) == 0) {
+                                return 0;
+                            } else {
+                                var c2 = n * Math.PI/l, c3 = a * c2;
+                                return function(x, t) {
+                                    return c1 * Math.sin(c2 * x) * Math.cos(c3 * t);
+                                };
+                            }
+                        })).reduce(XTFunction.add)
+                    );
+                }
+
+                var wave = new_wave;
+
+                var plot = new CAS.AnimatedPlot(document.getElementById("plot"));
+                plot.scale = 100;
+                var updateSize = function(e) {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                    this.draw();
+                }.bind(plot);
+                window.addEventListener("resize", updateSize, false);
+                updateSize();
+
+                function powSpread(base, n) {
+                    var as = [];
+                    for (var i=-1*n; i<=n; i++)
+                        as.push(Math.pow(base, i));
+                    return as;
+                }
+
+                var t = 0;
+                var as = seq(1, 30); // powSpread(5/3, 5);
+                var cs = colors(as.length, 0.8, 0.5);
+
+                var t = 0;
+                function bind(f) {return function(x) {return f(x, t)}}
+
+                for (var i=0; i<as.length; i++)
+                    plot.addAnimatedFunction(wave(plot.scale, as[i], 50), cs[i]);
+
+                plot.play(0.1, 1000/24);
+            })();
+        </script>
+    </body>
+</html>
