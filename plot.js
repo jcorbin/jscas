@@ -143,6 +143,18 @@ CAS.AnimatedPlot.prototype.play = function(step, interval) {
         this.redraw();
     }.bind(this), interval);
 };
+CAS.AnimatedPlot.prototype.draw = function() {
+    var start = new Date();
+    CAS.Plot.prototype.draw.apply(this, arguments);
+    var end = new Date();
+    var diff = end - start;
+    if (diff > this.animationInterval) {
+        if (this.step < this.canvas.width / 40)
+            this.step *= 2;
+        else
+            this.animationInterval *= 2;
+    }
+};
 CAS.AnimatedPlot.prototype.stop = function(step, interval) {
     step = step || 1;
     if (! this.running) return;
