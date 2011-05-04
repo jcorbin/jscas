@@ -22,6 +22,19 @@
             (function () {
                 "use strict";
 
+                function memoize(f) {
+                    var cache = {};
+                    return function() {
+                        var key = "memo:";
+                        for (var i=0; i<arguments.length; i++)
+                            key += JSON.stringify(arguments[i])+",";
+                        if (key in cache)
+                            return cache[key];
+                        else
+                            return cache[key] = f.apply(this, arguments);
+                    }
+                }
+
                 function colors(n, s, l) {
                     s = (s * 100).toFixed(1) + '%';
                     l = (l * 100).toFixed(1) + '%';
@@ -96,19 +109,6 @@
                             }
                         }).reduce(XTFunction.add)
                     );
-                }
-
-                function memoize(f) {
-                    var cache = {};
-                    return function() {
-                        var key = "memo:";
-                        for (var i=0; i<arguments.length; i++)
-                            key += JSON.stringify(arguments[i])+",";
-                        if (key in cache)
-                            return cache[key];
-                        else
-                            return cache[key] = f.apply(this, arguments);
-                    }
                 }
 
                 function new_wave(l, a, s) {
