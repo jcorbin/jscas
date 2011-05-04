@@ -103,31 +103,38 @@
                     }
                 }
 
-                function old_wave(l, a, s) {
-                    return XTFunction.mul(
-                        l*l/ Math.pow(Math.PI, 3),
-                        seq(1, s).map(function(n) {
-                            return wave_core(
-                                2/Math.pow(n, 3),
-                                function() {return n * Math.PI/l},
-                                function() {return a * n * Math.PI/l});
-                        }).reduce(XTFunction.add)
-                    );
+                function wave_sol(c, un) {
+                    return function(l, a, s) {
+                        if (typeof c == 'function')
+                            c = c(l, a);
+                        un = memoize(un);
+                        var u = seq(1, s)
+                            .map(function(n) {return un(n, l, a)})
+                            .reduce(XTFunction.add);
+                        return XTFunction.mul(c, u);
+                    }
                 }
 
-                function new_wave(l, a, s) {
-                    return XTFunction.mul(
-                        6 * Math.pow(Math.PI, 2),
-                        seq(1, s).map(memoize(function(n) {
-                            var npiot = n * Math.PI / 3;
-                            return wave_core(
-                                (Math.sin(2 * npiot) + Math.sin(npiot))/n,
-                                function() {return n * Math.PI/l},
-                                function() {return a * n * Math.PI/l});
-                        })).reduce(XTFunction.add)
-                    );
-                }
+                var old_wave = wave_sol(
+                    function(l, a) {
+                        return l*l/ Math.pow(Math.PI, 3);
+                    },
+                    function(n, l, a) {
+                        return wave_core(
+                            2/Math.pow(n, 3),
+                            function() {return n * Math.PI/l},
+                            function() {return a * n * Math.PI/l});
+                    });
 
+                var new_wave = wave_sol(
+                    6 * Math.pow(Math.PI, 2),
+                    function(n, l, a) {
+                        var npiot = n * Math.PI / 3;
+                        return wave_core(
+                            (Math.sin(2 * npiot) + Math.sin(npiot))/n,
+                            function() {return n * Math.PI/l},
+                            function() {return a * n * Math.PI/l});
+                    });
                 var wave = new_wave;
 
                 var plot = new CAS.AnimatedPlot(document.getElementById("plot"));
