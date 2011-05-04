@@ -24,6 +24,8 @@ CAS.Plot.prototype = {
         this.draw();
     },
 
+    "step": 1/2,
+
     "draw": function() {
         var ctx = this.canvas.getContext("2d"),
             w = ctx.canvas.width,
@@ -77,7 +79,7 @@ CAS.Plot.prototype = {
         for (var i=(x_axis % scale); i<h; i+=scale)
             y_tick(i);
 
-        var step = 1/2;
+        var step = this.step;
         this.functions.forEach(function(fn) {
             var y = translate(fn.function);
             ctx.strokeStyle = fn.color;
