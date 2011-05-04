@@ -28,6 +28,19 @@
             (function () {
                 "use strict";
 
+                function memoize(f) {
+                    var cache = {};
+                    return function() {
+                        var key = "memo:";
+                        for (var i=0; i<arguments.length; i++)
+                            key += JSON.stringify(arguments[i])+",";
+                        if (key in cache)
+                            return cache[key];
+                        else
+                            return cache[key] = f.apply(this, arguments);
+                    }
+                }
+
                 function colors(n, s, l) {
                     s = (s * 100).toFixed(1) + '%';
                     l = (l * 100).toFixed(1) + '%';
@@ -86,59 +99,52 @@
                     }
                 };
 
-                function old_wave(l, a, s) {
-                    return XTFunction.mul(
-                        l*l/ Math.pow(Math.PI, 3),
-                        seq(1, s).map(function(n) {
-                            var c1 = 2/Math.pow(n, 3);
-                            if (Math.round(c1) == 0) {
-                                return 0;
-                            } else {
-                                var c2 = n * Math.PI/l,
-                                    c3 = a * c2;
-                                return function(x, t) {
-                                    return c1 * Math.sin(c2 * x) * Math.cos(c3 * t);
-                                };
-                            }
-                        }).reduce(XTFunction.add)
-                    );
-                }
-
-                function memoize(f) {
-                    var cache = {};
-                    return function() {
-                        var key = "memo:";
-                        for (var i=0; i<arguments.length; i++)
-                            key += JSON.stringify(arguments[i])+",";
-                        if (key in cache)
-                            return cache[key];
-                        else
-                            return cache[key] = f.apply(this, arguments);
+                function wave_core(c1, c2, c3) {
+                    if (Math.round(c1) == 0)
+                        return 0;
+                    if (typeof c2 == 'function') c2 = c2();
+                    if (typeof c3 == 'function') c3 = c3();
+                    return function(x, t) {
+                        return c1 * Math.sin(c2 * x) * Math.cos(c3 * t);
                     }
                 }
 
-                function new_wave(l, a, s) {
-                    return XTFunction.mul(
-                        6 * Math.pow(Math.PI, 2),
-                        seq(1, s).map(memoize(function(n) {
-                            var npiot = n * Math.PI / 3,
-                                c1 = (Math.sin(2 * npiot) + Math.sin(npiot))/n;
-                            if (Math.round(c1) == 0) {
-                                return 0;
-                            } else {
-                                var c2 = n * Math.PI/l, c3 = a * c2;
-                                return function(x, t) {
-                                    return c1 * Math.sin(c2 * x) * Math.cos(c3 * t);
-                                };
-                            }
-                        })).reduce(XTFunction.add)
-                    );
+                function wave_sol(c, un) {
+                    return function(l, a, s) {
+                        if (typeof c == 'function')
+                            c = c(l, a);
+                        un = memoize(un);
+                        var u = seq(1, s)
+                            .map(function(n) {return un(n, l, a)})
+                            .reduce(XTFunction.add);
+                        return XTFunction.mul(c, u);
+                    }
                 }
 
+                var old_wave = wave_sol(
+                    function(l, a) {
+                        return l*l/ Math.pow(Math.PI, 3);
+                    },
+                    function(n, l, a) {
+                        return wave_core(
+                            2/Math.pow(n, 3),
+                            function() {return n * Math.PI/l},
+                            function() {return a * n * Math.PI/l});
+                    });
+
+                var new_wave = wave_sol(
+                    6 / Math.pow(Math.PI, 2),
+                    function(n, l, a) {
+                        var npiot = n * Math.PI / 3;
+                        return wave_core(
+                            (Math.sin(2 * npiot) + Math.sin(npiot))/n,
+                            function() {return n * Math.PI/l},
+                            function() {return a * n * Math.PI/l});
+                    });
                 var wave = new_wave;
 
                 var plot = new CAS.AnimatedPlot(document.getElementById("plot"));
-                plot.scale = 100;
+                plot.scale = 3;
                 var updateSize = function(e) {
                     this.canvas.width = window.innerWidth;
                     this.canvas.height = window.innerHeight;
@@ -164,7 +170,7 @@
                 for (var i=0; i<as.length; i++)
                     plot.addAnimatedFunction(wave(plot.scale, as[i], 50), cs[i]);
 
-                plot.play(0.1, 1000/24);
+                plot.play(1/500, 1000/24);
             })();
         </script>
         <footer>
