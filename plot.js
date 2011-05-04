@@ -24,6 +24,8 @@ CAS.Plot.prototype = {
         this.draw();
     },
 
+    "step": 1/2,
+
     "draw": function() {
         var ctx = this.canvas.getContext("2d"),
             w = ctx.canvas.width,
@@ -77,7 +79,7 @@ CAS.Plot.prototype = {
         for (var i=(x_axis % scale); i<h; i+=scale)
             y_tick(i);
 
-        var step = 10;
+        var step = this.step;
         this.functions.forEach(function(fn) {
             var y = translate(fn.function);
             ctx.strokeStyle = fn.color;
@@ -140,6 +142,18 @@ CAS.AnimatedPlot.prototype.play = function(step, interval) {
         this.t += step;
         this.redraw();
     }.bind(this), interval);
+};
+CAS.AnimatedPlot.prototype.draw = function() {
+    var start = new Date();
+    CAS.Plot.prototype.draw.apply(this, arguments);
+    var end = new Date();
+    var diff = end - start;
+    if (diff > this.animationInterval) {
+        if (this.step < this.canvas.width / 40)
+            this.step *= 2;
+        else
+            this.animationInterval *= 2;
+    }
 };
 CAS.AnimatedPlot.prototype.stop = function(step, interval) {
     step = step || 1;
