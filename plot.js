@@ -77,7 +77,7 @@ CAS.Plot.prototype = {
         for (var i=(x_axis % scale); i<h; i+=scale)
             y_tick(i);
 
-        var step = 1/2;
+        var step = 10;
         this.functions.forEach(function(fn) {
             var y = translate(fn.function);
             ctx.strokeStyle = fn.color;
