@@ -84,7 +84,6 @@ CAS.Plot.prototype = {
             var y = translate(fn.function);
             ctx.strokeStyle = fn.color;
             ctx.beginPath();
-            var data = [];
             var last = undefined;
             for (var x=0; x<w; x+=step) {
                 var cur = y(x);
@@ -95,12 +94,6 @@ CAS.Plot.prototype = {
                         ctx.lineTo(x, cur);
                 }
                 last = cur;
-                if (cur != undefined) {
-                    data.push([
-                        (x - y_axis)/scale,
-                        cur = -1 * (cur - x_axis) / scale
-                    ]);
-                }
             }
             if (last != undefined)
                 ctx.lineTo(w, y(w));
