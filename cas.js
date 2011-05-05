@@ -7,12 +7,12 @@ function gcd(a, b) {
     return b == 0 ? a : gcd(b, a % b);
 }
 
-function RationalNumber(numer, denom) {
+CAS.RationalNumber = function(numer, denom) {
     var d = gcd(numer, denom);
     this.numer = numer / d;
     this.denom = denom / d;
 }
-RationalNumber.make = function(numer, denom) {
+CAS.RationalNumber.make = function(numer, denom) {
     var m = 1;
     if (numer < 0) {
         m *= -1;
@@ -26,21 +26,21 @@ RationalNumber.make = function(numer, denom) {
     numer /= d;
     denom /= d;
     numer *= m;
-    return denom == 1 ? numer*m : new RationalNumber(numer*m, denom);
+    return denom == 1 ? numer*m : new CAS.RationalNumber(numer*m, denom);
 };
-RationalNumber.prototype = {
+CAS.RationalNumber.prototype = {
     "reciprocal": function() {
-        return new RationalNumber(this.denom, this.numer);
+        return new CAS.RationalNumber(this.denom, this.numer);
     },
     "add": function(other) {
         if (typeof other == "number") {
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer + this.denom * other,
                 this.denom
             );
-        } else if (other instanceof RationalNumber) {
+        } else if (other instanceof CAS.RationalNumber) {
             var d = gcd(this.denom, other.denom);
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer * other.denom/d + other.numer * this.denom/d,
                 this.denom * other.denom
             );
@@ -50,13 +50,13 @@ RationalNumber.prototype = {
     },
     "subtract": function(other) {
         if (typeof other == "number") {
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer - this.denom * other,
                 this.denom
             );
-        } else if (other instanceof RationalNumber) {
+        } else if (other instanceof CAS.RationalNumber) {
             var d = gcd(this.denom, other.denom);
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer * other.denom/d - other.numer * this.denom/d,
                 this.denom * other.denom
             );
@@ -66,12 +66,12 @@ RationalNumber.prototype = {
     },
     "multiply": function(other) {
         if (typeof other == "number") {
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer * other,
                 this.denom
             );
-        } else if (other instanceof RationalNumber) {
-            return new RationalNumber(
+        } else if (other instanceof CAS.RationalNumber) {
+            return new CAS.RationalNumber(
                 this.numer * other.numer,
                 this.denom * other.denom
             );
@@ -81,12 +81,12 @@ RationalNumber.prototype = {
     },
     "divide": function(other) {
         if (typeof other == "number") {
-            return new RationalNumber(
+            return new CAS.RationalNumber(
                 this.numer,
                 this.denom * other
             );
-        } else if (other instanceof RationalNumber) {
-            return new RationalNumber(
+        } else if (other instanceof CAS.RationalNumber) {
+            return new CAS.RationalNumber(
                 this.numer * other.denom,
                 this.denom * other.numer
             );
@@ -102,16 +102,13 @@ RationalNumber.prototype = {
     }
 };
 
-function Variable(name) {
+CAS.Variable = function(name) {
     this.name = name;
 }
-Variable.prototype = {
+CAS.Variable.prototype = {
     "toString": function() {return this.name}
 };
-Variable.prototype.toJSON = Variable.prototype.toString;
-
-CAS.RationalNumber = RationalNumber;
-CAS.Variable = Variable;
+CAS.Variable.prototype.toJSON = CAS.Variable.prototype.toString;
 
 return CAS;
 })(window.CAS || {});
