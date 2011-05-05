@@ -23,6 +23,7 @@ CAS.Grammar = function() {
     this.tokens = [
         (new CAS.Token(/^\s*()$/))
     ];
+    this.symbols = {};
 };
 CAS.Grammar.prototype = {
     "compile": function() {
@@ -75,6 +76,7 @@ CAS.Grammar.prototype = {
     },
 
     "addSymbol": function(symbol) {
+        this.symbols[symbol.symbol] = symbol;
         this.tokens.splice(this.first_token, 0, symbol);
         this.first_token++;
         delete this.recognizer;
