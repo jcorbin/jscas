@@ -76,6 +76,8 @@ CAS.Grammar.prototype = {
     },
 
     "addSymbol": function(symbol) {
+        if (symbol.symbol in this.symbols)
+            throw new Error('symbol ' + symbol.symbol + ' already defined');
         this.symbols[symbol.symbol] = symbol;
         this.tokens.splice(this.first_token, 0, symbol);
         this.first_token++;
