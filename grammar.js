@@ -86,7 +86,13 @@ CAS.Grammar.prototype = {
     },
 
     "symbol": function(symbol, bp, nud, led) {
-        return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
+        if (symbol in this.symbols) {
+            if (arguments.length > 1)
+                throw new Error('symbol ' + symbol + ' already defined, too many args');
+            return this.symbols[symbol];
+        } else {
+            return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
+        }
     }
 };
 
