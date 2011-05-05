@@ -133,37 +133,14 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-function Operator(symbol, bp, rbp) {
-    this.rbp = rbp == undefined ? bp : rbp;
-    CAS.Symbol.call(this, symbol, bp);
-
-    this.expression = function() {
-        Operator.Expression.apply(this, arguments);
-    }
-    this.expression.prototype = Object.create(Operator.Expression.prototype);
-    this.expression.prototype.op = this;
-}
-Operator.prototype = Object.create(CAS.Symbol.prototype);
-
-Operator.Expression = function() {
-    for (var i=0; i<arguments.length; i++)
-        this.push(arguments[i]);
-};
-Operator.Expression.prototype = Object.create(Array.prototype);
-Operator.Expression.prototype.toJSON = function() {
-    var a = [this.op.symbol];
-    for (var i=0; i<this.length; i++) a.push(this[i]);
-    return a;
-};
-
 function BinaryOperator(symbol, bp, associative, commutative) {
     if (associative == undefined) this.associative = associative;
     if (commutative == undefined) this.commutative = commutative;
-    Operator.call(this, symbol, bp);
+    CAS.Operator.call(this, symbol, bp);
     this.expression.prototype.toString = function() {
         return this
             .map(function(arg) {
-                if (arg instanceof Operator.Expression
+                if (arg instanceof CAS.Operator.Expression
                     && this.bp >= arg.op.bp)
                     return "(" + arg + ")";
                 else
@@ -172,7 +149,7 @@ function BinaryOperator(symbol, bp, associative, commutative) {
             .join(" " + this.op.symbol + " ");
     };
 }
-BinaryOperator.prototype = Object.create(Operator.prototype);
+BinaryOperator.prototype = Object.create(CAS.Operator.prototype);
 BinaryOperator.prototype.associative = true;
 BinaryOperator.prototype.commutative = true;
 BinaryOperator.prototype.led = function(parser, left) {

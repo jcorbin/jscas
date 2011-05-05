@@ -2,6 +2,29 @@
 
 window.CAS = (function(CAS) {
 
+CAS.Operator = function(symbol, bp, rbp) {
+    this.rbp = rbp == undefined ? bp : rbp;
+    CAS.Symbol.call(this, symbol, bp);
+
+    this.expression = function() {
+        CAS.Operator.Expression.apply(this, arguments);
+    }
+    this.expression.prototype = Object.create(CAS.Operator.Expression.prototype);
+    this.expression.prototype.op = this;
+}
+CAS.Operator.prototype = Object.create(CAS.Symbol.prototype);
+
+CAS.Operator.Expression = function() {
+    for (var i=0; i<arguments.length; i++)
+        this.push(arguments[i]);
+};
+CAS.Operator.Expression.prototype = Object.create(Array.prototype);
+CAS.Operator.Expression.prototype.toJSON = function() {
+    var a = [this.op.symbol];
+    for (var i=0; i<this.length; i++) a.push(this[i]);
+    return a;
+};
+
 function groupby(vals, key) {
     var r = [], buf = [], i = -1, cur = null;
     vals.forEach(function(val) {
