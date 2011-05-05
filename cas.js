@@ -133,37 +133,6 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-function BinaryOperator(symbol, bp, associative, commutative) {
-    if (associative == undefined) this.associative = associative;
-    if (commutative == undefined) this.commutative = commutative;
-    CAS.Operator.call(this, symbol, bp);
-    this.expression.prototype.toString = function() {
-        return this
-            .map(function(arg) {
-                if (arg instanceof CAS.Operator.Expression
-                    && this.bp >= arg.op.bp)
-                    return "(" + arg + ")";
-                else
-                    return arg;
-            }, this.op)
-            .join(" " + this.op.symbol + " ");
-    };
-}
-BinaryOperator.prototype = Object.create(CAS.Operator.prototype);
-BinaryOperator.prototype.associative = true;
-BinaryOperator.prototype.commutative = true;
-BinaryOperator.prototype.led = function(parser, left) {
-    var expr = parser.expression(this.rbp);
-    if (this.associative && left instanceof this.expression)
-        left.push(expr);
-    else
-        left = new this.expression(left, expr);
-    return left;
-};
-CAS.Grammar.prototype.operator = function(symbol, bp, a, c) {
-    return this.addSymbol(new BinaryOperator(symbol, bp, a, c));
-};
-
 CAS.Arithmetic.operator("+", 50);
 CAS.Arithmetic.operator("-", 50).nud = function(parser) {
     return Negative.make(parser.expression(70));
@@ -173,7 +142,6 @@ CAS.Arithmetic.operator("/", 60);
 
 CAS.RationalNumber = RationalNumber;
 CAS.Variable = Variable;
-CAS.BinaryOperator = BinaryOperator;
 
 return CAS;
 })(window.CAS || {});

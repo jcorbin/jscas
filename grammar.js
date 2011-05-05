@@ -25,6 +25,34 @@ CAS.Operator.Expression.prototype.toJSON = function() {
     return a;
 };
 
+CAS.BinaryOperator = function(symbol, bp, associative, commutative) {
+    if (associative == undefined) this.associative = associative;
+    if (commutative == undefined) this.commutative = commutative;
+    CAS.Operator.call(this, symbol, bp);
+    this.expression.prototype.toString = function() {
+        return this
+            .map(function(arg) {
+                if (arg instanceof CAS.Operator.Expression
+                    && this.bp >= arg.op.bp)
+                    return "(" + arg + ")";
+                else
+                    return arg;
+            }, this.op)
+            .join(" " + this.op.symbol + " ");
+    };
+};
+CAS.BinaryOperator.prototype = Object.create(CAS.Operator.prototype);
+CAS.BinaryOperator.prototype.associative = true;
+CAS.BinaryOperator.prototype.commutative = true;
+CAS.BinaryOperator.prototype.led = function(parser, left) {
+    var expr = parser.expression(this.rbp);
+    if (this.associative && left instanceof this.expression)
+        left.push(expr);
+    else
+        left = new this.expression(left, expr);
+    return left;
+};
+
 function groupby(vals, key) {
     var r = [], buf = [], i = -1, cur = null;
     vals.forEach(function(val) {
@@ -116,6 +144,10 @@ CAS.Grammar.prototype = {
         } else {
             return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
         }
+    },
+
+    "operator": function(symbol, bp, a, c) {
+        return this.addSymbol(new CAS.BinaryOperator(symbol, bp, a, c));
     }
 };
 
