@@ -102,29 +102,6 @@ RationalNumber.prototype = {
     }
 };
 
-var Negative = function(expr) {
-    this.expr = expr;
-}
-Negative.make = function(expr) {
-    if (typeof expr == "number") {
-        return -1 * expr;
-    } else if (expr instanceof RationalNumber) {
-        return new RationalNumber(expr.numer * -1, expr.denom);
-    } else if (expr instanceof Negative) {
-        return expr.expr;
-    } else {
-        return new Negative(expr);
-    }
-};
-Negative.prototype = {
-    "toString": function() {
-        return "-" + this.expr.toString();
-    },
-    "toJSON": function() {
-        return ["-", this.expr];
-    }
-};
-
 function Variable(name) {
     this.name = name;
 }
@@ -132,10 +109,6 @@ Variable.prototype = {
     "toString": function() {return this.name}
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
-
-CAS.Arithmetic.operator("-").nud = function(parser) {
-    return Negative.make(parser.expression(70));
-};
 
 CAS.RationalNumber = RationalNumber;
 CAS.Variable = Variable;
