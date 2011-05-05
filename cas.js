@@ -133,12 +133,9 @@ Variable.prototype = {
 };
 Variable.prototype.toJSON = Variable.prototype.toString;
 
-CAS.Arithmetic.operator("+", 50);
-CAS.Arithmetic.operator("-", 50).nud = function(parser) {
+CAS.Arithmetic.operator("-").nud = function(parser) {
     return Negative.make(parser.expression(70));
 };
-CAS.Arithmetic.operator("*", 60);
-CAS.Arithmetic.operator("/", 60);
 
 CAS.RationalNumber = RationalNumber;
 CAS.Variable = Variable;

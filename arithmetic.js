@@ -18,5 +18,10 @@ CAS.Arithmetic.token("number", /^\s*(-?\d+(?:\.\d+)?(?:E-?\d+)?)/,
         return n;
     });
 
+CAS.Arithmetic.operator("+", 50);
+CAS.Arithmetic.operator("-", 50);
+CAS.Arithmetic.operator("*", 60);
+CAS.Arithmetic.operator("/", 60);
+
 return CAS;
 })(window.CAS || {});
