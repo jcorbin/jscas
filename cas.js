@@ -187,31 +187,16 @@ CAS.Grammar.prototype.operator = function(symbol, bp, a, c) {
     return this.addSymbol(new BinaryOperator(symbol, bp, a, c));
 };
 
-var Arithmetic = new CAS.Grammar();
-Arithmetic.symbol(")");
-Arithmetic.symbol("(").nud = function(parser) {
-    var expr = parser.expression();
-    parser.take(")");
-    return expr;
-};
-Arithmetic.token("number", /^\s*(-?\d+(?:\.\d+)?(?:E-?\d+)?)/,
-    function(parser) {
-        var n = Number(this.value);
-        if (isNaN(n))
-            token.error("not a number");
-        return n;
-    });
-Arithmetic.operator("+", 50);
-Arithmetic.operator("-", 50).nud = function(parser) {
+CAS.Arithmetic.operator("+", 50);
+CAS.Arithmetic.operator("-", 50).nud = function(parser) {
     return Negative.make(parser.expression(70));
 };
-Arithmetic.operator("*", 60);
-Arithmetic.operator("/", 60);
+CAS.Arithmetic.operator("*", 60);
+CAS.Arithmetic.operator("/", 60);
 
 CAS.RationalNumber = RationalNumber;
 CAS.Variable = Variable;
 CAS.BinaryOperator = BinaryOperator;
-CAS.Arithmetic = Arithmetic;
 
 return CAS;
 })(window.CAS || {});
