@@ -70,15 +70,15 @@ CAS.Grammar.prototype = {
         return token;
     },
 
+    "token": function(token, regex, nud) {
+        return this.addToken(new CAS.Token(regex, 0, nud));
+    },
+
     "addSymbol": function(symbol) {
         this.tokens.splice(this.first_token, 0, symbol);
         this.first_token++;
         delete this.recognizer;
         return symbol;
-    },
-
-    "token": function(token, regex, nud) {
-        return this.addToken(new CAS.Token(regex, 0, nud));
     },
 
     "symbol": function(symbol, bp, nud, led) {
