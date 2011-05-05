@@ -5,8 +5,6 @@
         <title>cas test</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
         <script src="es5-shim.js" language="JavaScript"></script>
-        <script src="parser.js" language="JavaScript"></script>
-        <script src="cas.js" language="JavaScript"></script>
         <script src="plot.js" language="JavaScript"></script>
         <style type="text/css">
             #plot {
@@ -144,7 +142,8 @@
                 var wave = new_wave;
 
                 var plot = new CAS.AnimatedPlot(document.getElementById("plot"));
-                plot.scale = 3;
+                plot.xscale = 6;
+                plot.yscale = 3;
                 var updateSize = function(e) {
                     this.canvas.width = window.innerWidth;
                     this.canvas.height = window.innerHeight;
@@ -168,7 +167,7 @@
                 function bind(f) {return function(x) {return f(x, t)}}
 
                 for (var i=0; i<as.length; i++)
-                    plot.addAnimatedFunction(wave(plot.scale, as[i], 50), cs[i]);
+                    plot.addAnimatedFunction(wave(plot.xscale/2, as[i], 50), cs[i]);
 
                 plot.play(1/500, 1000/24);
             })();
