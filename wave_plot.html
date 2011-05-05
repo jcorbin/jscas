@@ -136,7 +136,7 @@
                 var wave = new_wave;
 
                 var plot = new CAS.AnimatedPlot(document.getElementById("plot"));
-                plot.scale = 3;
+                plot.xscale = 3;
                 var updateSize = function(e) {
                     this.canvas.width = window.innerWidth;
                     this.canvas.height = window.innerHeight;
@@ -160,7 +160,7 @@
                 function bind(f) {return function(x) {return f(x, t)}}
 
                 for (var i=0; i<as.length; i++)
-                    plot.addAnimatedFunction(wave(plot.scale, as[i], 50), cs[i]);
+                    plot.addAnimatedFunction(wave(plot.xscale, as[i], 50), cs[i]);
 
                 plot.play(1/500, 1000/24);
             })();

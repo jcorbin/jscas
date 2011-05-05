@@ -7,7 +7,8 @@ CAS.Plot = function(canvas) {
     this.functions = [];
 };
 CAS.Plot.prototype = {
-    "scale": 6,
+    "xscale": 6,
+    "yscale": 6,
     "axisStyle": "#333",
     "axisLabelStyle": "#666",
 
@@ -32,15 +33,16 @@ CAS.Plot.prototype = {
             h = ctx.canvas.height,
             y_axis = 0, //Math.floor(w/2),
             x_axis = Math.floor(h/2),
-            scale = Math.floor(w/this.scale);
+            xscale = Math.floor(w/this.xscale),
+            yscale = Math.floor(h/this.yscale);
 
         function translate(f) {
             return function(x) {
-                var val = f((x - y_axis)/scale);
+                var val = f((x - y_axis)/xscale);
                 if (val == undefined || val == null || isNaN(val))
                     return undefined;
                 else
-                    return x_axis + scale * -1 * val;
+                    return x_axis + yscale * -1 * val;
             };
         }
 
@@ -52,19 +54,19 @@ CAS.Plot.prototype = {
             ctx.closePath();
         }
 
-        var ts = scale/25;
+        var xts = yscale/25, yts = xscale/25;
         function x_tick(x, label) {
-            line(x, x_axis + ts, x, x_axis - ts);
+            line(x, x_axis + xts, x, x_axis - xts);
             if (label) {
                 var w = ctx.measureText(label).width;
-                ctx.fillText(label, x - w/2, x_axis - ts);
+                ctx.fillText(label, x - w/2, x_axis - xts);
             }
         }
         function y_tick(y, label) {
-            line(y_axis + ts, y, y_axis - ts, y);
+            line(y_axis + yts, y, y_axis - yts, y);
             if (label) {
                 var h = ctx.measureText(label).height;
-                ctx.fillText(label, y_axis - ts, y - h/2);
+                ctx.fillText(label, y_axis - yts, y - h/2);
             }
         }
 
@@ -74,9 +76,9 @@ CAS.Plot.prototype = {
 
         ctx.fillStyle = this.axisLabelStyle;
 
-        for (var i=(y_axis % scale); i<w; i+=scale)
+        for (var i=(y_axis % xscale); i<w; i+=xscale)
             x_tick(i);
-        for (var i=(x_axis % scale); i<h; i+=scale)
+        for (var i=(x_axis % yscale); i<h; i+=yscale)
             y_tick(i);
 
         var step = this.step;
