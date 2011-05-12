@@ -6,103 +6,98 @@ CAS.Plot = function(canvas) {
     this.canvas = canvas || document.createElement('canvas');
     this.functions = [];
 };
-CAS.Plot.prototype = {
-    "xscale": 6,
-    "yscale": 6,
-    "axisStyle": "#333",
-    "axisLabelStyle": "#666",
+CAS.Plot.prototype.xscale = 6;
+CAS.Plot.prototype.yscale = 6;
+CAS.Plot.prototype.axisStyle = "#333";
+CAS.Plot.prototype.axisLabelStyle = "#666";
+CAS.Plot.prototype.step = 1/2;
 
-    "addFunction": function(f, color) {
-        this.functions.push({
-            "function": f,
-            "color": color || "#6f6"
-        });
-        this.redraw();
-    },
+CAS.Plot.prototype.addFunction = function(f, color) {
+    this.functions.push({
+        "function": f,
+        "color": color || "#6f6"
+    });
+    this.redraw();
+};
+CAS.Plot.prototype.redraw = function() {
+    this.canvas.width = this.canvas.width;
+    this.draw();
+};
+CAS.Plot.prototype.draw = function() {
+    var ctx = this.canvas.getContext("2d"),
+        w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        y_axis = Math.floor(w/2),
+        x_axis = Math.floor(h/2),
+        xscale = Math.floor(w/this.xscale),
+        yscale = Math.floor(h/this.yscale);
 
-    "redraw": function() {
-        this.canvas.width = this.canvas.width;
-        this.draw();
-    },
-
-    "step": 1/2,
-
-    "draw": function() {
-        var ctx = this.canvas.getContext("2d"),
-            w = ctx.canvas.width,
-            h = ctx.canvas.height,
-            y_axis = Math.floor(w/2),
-            x_axis = Math.floor(h/2),
-            xscale = Math.floor(w/this.xscale),
-            yscale = Math.floor(h/this.yscale);
-
-        function translate(f) {
-            return function(x) {
-                var val = f((x - y_axis)/xscale);
-                if (val == undefined || val == null || isNaN(val))
-                    return undefined;
-                else
-                    return x_axis + yscale * -1 * val;
-            };
-        }
-
-        function line(x1, y1, x2, y2) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        var xts = yscale/25, yts = xscale/25;
-        function x_tick(x, label) {
-            line(x, x_axis + xts, x, x_axis - xts);
-            if (label) {
-                var w = ctx.measureText(label).width;
-                ctx.fillText(label, x - w/2, x_axis - xts);
-            }
-        }
-        function y_tick(y, label) {
-            line(y_axis + yts, y, y_axis - yts, y);
-            if (label) {
-                var h = ctx.measureText(label).height;
-                ctx.fillText(label, y_axis - yts, y - h/2);
-            }
-        }
-
-        ctx.strokeStyle = this.axisStyle;
-        line(0, x_axis, w, x_axis);
-        line(y_axis, 0, y_axis, h);
-
-        ctx.fillStyle = this.axisLabelStyle;
-
-        for (var i=(y_axis % xscale); i<w; i+=xscale)
-            x_tick(i);
-        for (var i=(x_axis % yscale); i<h; i+=yscale)
-            y_tick(i);
-
-        var step = this.step;
-        this.functions.forEach(function(fn) {
-            var y = translate(fn.function);
-            ctx.strokeStyle = fn.color;
-            ctx.beginPath();
-            var last = undefined;
-            for (var x=0; x<w; x+=step) {
-                var cur = y(x);
-                if (cur != undefined) {
-                    if (last == undefined)
-                        ctx.moveTo(x, cur);
-                    else
-                        ctx.lineTo(x, cur);
-                }
-                last = cur;
-            }
-            if (last != undefined)
-                ctx.lineTo(w, y(w));
-            ctx.stroke();
-            ctx.closePath();
-        }, this);
+    function translate(f) {
+        return function(x) {
+            var val = f((x - y_axis)/xscale);
+            if (val == undefined || val == null || isNaN(val))
+                return undefined;
+            else
+                return x_axis + yscale * -1 * val;
+        };
     }
+
+    function line(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    var xts = yscale/25, yts = xscale/25;
+    function x_tick(x, label) {
+        line(x, x_axis + xts, x, x_axis - xts);
+        if (label) {
+            var w = ctx.measureText(label).width;
+            ctx.fillText(label, x - w/2, x_axis - xts);
+        }
+    }
+    function y_tick(y, label) {
+        line(y_axis + yts, y, y_axis - yts, y);
+        if (label) {
+            var h = ctx.measureText(label).height;
+            ctx.fillText(label, y_axis - yts, y - h/2);
+        }
+    }
+
+    ctx.strokeStyle = this.axisStyle;
+    line(0, x_axis, w, x_axis);
+    line(y_axis, 0, y_axis, h);
+
+    ctx.fillStyle = this.axisLabelStyle;
+
+    for (var i=(y_axis % xscale); i<w; i+=xscale)
+        x_tick(i);
+    for (var i=(x_axis % yscale); i<h; i+=yscale)
+        y_tick(i);
+
+    var step = this.step;
+    this.functions.forEach(function(fn) {
+        var y = translate(fn.function);
+        ctx.strokeStyle = fn.color;
+        ctx.beginPath();
+        var last = undefined;
+        for (var x=0; x<w; x+=step) {
+            var cur = y(x);
+            if (cur != undefined) {
+                if (last == undefined)
+                    ctx.moveTo(x, cur);
+                else
+                    ctx.lineTo(x, cur);
+            }
+            last = cur;
+        }
+        if (last != undefined)
+            ctx.lineTo(w, y(w));
+        ctx.stroke();
+        ctx.closePath();
+    }, this);
 };
 
 CAS.AnimatedPlot = function(canvas) {

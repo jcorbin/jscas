@@ -37,13 +37,11 @@ CAS.Negative.make = function(expr) {
         return new CAS.Negative(expr);
     }
 };
-CAS.Negative.prototype = {
-    "toString": function() {
-        return "-" + this.expr.toString();
-    },
-    "toJSON": function() {
-        return ["-", this.expr];
-    }
+CAS.Negative.prototype.toString = function() {
+    return "-" + this.expr.toString();
+};
+CAS.Negative.prototype.toJSON = function() {
+    return ["-", this.expr];
 };
 
 CAS.Arithmetic.symbol("-").nud = function(parser) {

@@ -86,79 +86,70 @@ CAS.Grammar = function() {
     ];
     this.symbols = {};
 };
-CAS.Grammar.prototype = {
-    "compile": function() {
-        var rs = this.tokens.map(function(r) {return r.regex.source});
-        rs = groupby(rs, function(s) {
-            s = s.substr(0, 4);
-            return s == "^\\s*" ? s : null;
-        });
-        rs = rs.map(function(group) {
-            var vals = group.vals.join("|");
-            if (group.key)
-                vals = group.key + "(?:" + vals + ")";
-            return vals;
-        });
-        if (rs.length > 1)
-            rs = rs.join("|");
-        else
-            rs = rs[0];
-        this.regex = new RegExp(rs)
-    },
-
-    "recognize": function(input) {
-        var match = this.regex.exec(input);
-        if (! match) return null;
-        for (var i=1; i<match.length; i++)
-            if (match[i] != undefined) {
-                var token = Object.create(this.tokens[i-1]);
-                token.consumed = match[0].length;
-                token.value = match[i];
-                return token;
-            }
-        return null;
-    },
-
-    "parse": function(input) {
-        if (! this.regex)
-            this.compile();
-        var parser = new CAS.Parser(this.recognize.bind(this), input);
-        return parser.expression();
-    },
-
-    "addToken": function(token) {
-        this.tokens.splice(-1, 0, token);
-        delete this.recognizer;
-        return token;
-    },
-
-    "token": function(token, regex, nud) {
-        return this.addToken(new CAS.Token(regex, 0, nud));
-    },
-
-    "addSymbol": function(symbol) {
-        if (symbol.symbol in this.symbols)
-            throw new Error('symbol ' + symbol.symbol + ' already defined');
-        this.symbols[symbol.symbol] = symbol;
-        this.tokens.splice(this.first_token, 0, symbol);
-        this.first_token++;
-        delete this.recognizer;
-        return symbol;
-    },
-
-    "symbol": function(symbol, bp, nud, led) {
-        if (symbol in this.symbols) {
-            if (arguments.length > 1)
-                throw new Error('symbol ' + symbol + ' already defined, too many args');
-            return this.symbols[symbol];
-        } else {
-            return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
+CAS.Grammar.prototype.compile = function() {
+    var rs = this.tokens.map(function(r) {return r.regex.source});
+    rs = groupby(rs, function(s) {
+        s = s.substr(0, 4);
+        return s == "^\\s*" ? s : null;
+    });
+    rs = rs.map(function(group) {
+        var vals = group.vals.join("|");
+        if (group.key)
+            vals = group.key + "(?:" + vals + ")";
+        return vals;
+    });
+    if (rs.length > 1)
+        rs = rs.join("|");
+    else
+        rs = rs[0];
+    this.regex = new RegExp(rs)
+};
+CAS.Grammar.prototype.recognize = function(input) {
+    var match = this.regex.exec(input);
+    if (! match) return null;
+    for (var i=1; i<match.length; i++)
+        if (match[i] != undefined) {
+            var token = Object.create(this.tokens[i-1]);
+            token.consumed = match[0].length;
+            token.value = match[i];
+            return token;
         }
-    },
-
-    "operator": function(symbol, bp, a, c) {
-        return this.addSymbol(new CAS.BinaryOperator(symbol, bp, a, c));
+    return null;
+};
+CAS.Grammar.prototype.parse = function(input) {
+    if (! this.regex)
+        this.compile();
+    var parser = new CAS.Parser(this.recognize.bind(this), input);
+    return parser.expression();
+};
+CAS.Grammar.prototype.addToken = function(token) {
+    this.tokens.splice(-1, 0, token);
+    delete this.recognizer;
+    return token;
+};
+CAS.Grammar.prototype.token = function(token, regex, nud) {
+    return this.addToken(new CAS.Token(regex, 0, nud));
+};
+CAS.Grammar.prototype.addSymbol = function(symbol) {
+    if (symbol.symbol in this.symbols)
+        throw new Error('symbol ' + symbol.symbol + ' already defined');
+    this.symbols[symbol.symbol] = symbol;
+    this.tokens.splice(this.first_token, 0, symbol);
+    this.first_token++;
+    delete this.recognizer;
+    return symbol;
+};
+CAS.Grammar.prototype.symbol = function(symbol, bp, nud, led) {
+    if (symbol in this.symbols) {
+        if (arguments.length > 1)
+            throw new Error('symbol ' + symbol + ' already defined, too many args');
+        return this.symbols[symbol];
+    } else {
+        return this.addSymbol(new CAS.Symbol(symbol, bp, nud, led));
     }
+};
+CAS.Grammar.prototype.operator = function(symbol, bp, a, c) {
+    return this.addSymbol(new CAS.BinaryOperator(symbol, bp, a, c));
 };
 
 return CAS;
