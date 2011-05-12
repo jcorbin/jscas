@@ -3,8 +3,11 @@
 window.CAS = (function(CAS) {
 
 CAS.Operator = function(symbol, bp, rbp) {
-    this.rbp = rbp == undefined ? bp : rbp;
     CAS.Symbol.call(this, symbol, bp);
+    if (rbp != undefined)
+        this.rbp = rbp;
+    else if (bp != undefined)
+        this.rbp = bp;
 
     this.expression = function() {
         CAS.Operator.Expression.apply(this, arguments);
