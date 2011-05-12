@@ -7,7 +7,7 @@ function gcd(a, b) {
     return b == 0 ? a : gcd(b, a % b);
 }
 
-CAS.Rational = function(numer, denom) {
+CAS.Rational = function rational(numer, denom) {
     var d = gcd(numer, denom);
     this.numer = numer / d;
     this.denom = denom / d;

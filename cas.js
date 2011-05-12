@@ -2,7 +2,7 @@
 
 window.CAS = (function(CAS) {
 
-CAS.Variable = function(name) {
+CAS.Variable = function variable(name) {
     this.name = name;
 }
 CAS.Variable.prototype.toString =
