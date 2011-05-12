@@ -109,7 +109,10 @@ CAS.AnimatedPlot = function(canvas) {
     this.t = 0;
     CAS.Plot.call(this, canvas);
 };
-CAS.AnimatedPlot.prototype = Object.create(CAS.Plot.prototype);
+CAS.AnimatedPlot.prototype = new CAS.Plot();
+CAS.AnimatedPlot.prototype.constructor = CAS.AnimatedPlot;
+delete CAS.AnimatedPlot.prototype.canvas;
+
 CAS.AnimatedPlot.prototype.animateFunction = function(f) {
     return function(x) {
         return f(x, this.t);

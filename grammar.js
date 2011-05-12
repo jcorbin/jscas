@@ -12,16 +12,20 @@ CAS.Operator = function(symbol, bp, rbp) {
     this.expression = function() {
         CAS.Operator.Expression.apply(this, arguments);
     }
-    this.expression.prototype = Object.create(CAS.Operator.Expression.prototype);
+    this.expression.prototype = new CAS.Operator.Expression();
+    this.expression.prototype.constructor = this.expression;
     this.expression.prototype.op = this;
 }
-CAS.Operator.prototype = Object.create(CAS.Symbol.prototype);
+CAS.Operator.prototype = new CAS.Symbol();
+CAS.Operator.prototype.constructor = CAS.Operator;
 
 CAS.Operator.Expression = function() {
     for (var i=0; i<arguments.length; i++)
         this.push(arguments[i]);
 };
-CAS.Operator.Expression.prototype = Object.create(Array.prototype);
+CAS.Operator.Expression.prototype = new Array();
+CAS.Operator.Expression.prototype.constructor = CAS.Operator.Expression;
+
 CAS.Operator.Expression.prototype.toJSON = function() {
     var a = [this.op.symbol];
     for (var i=0; i<this.length; i++) a.push(this[i]);
@@ -44,7 +48,10 @@ CAS.BinaryOperator = function(symbol, bp, associative, commutative) {
             .join(" " + this.op.symbol + " ");
     };
 };
-CAS.BinaryOperator.prototype = Object.create(CAS.Operator.prototype);
+CAS.BinaryOperator.prototype = new CAS.Operator();
+CAS.BinaryOperator.prototype.constructor = CAS.BinaryOperator;
+delete CAS.BinaryOperator.prototype.expression;
+
 CAS.BinaryOperator.prototype.associative = true;
 CAS.BinaryOperator.prototype.commutative = true;
 CAS.BinaryOperator.prototype.led = function(parser, left) {

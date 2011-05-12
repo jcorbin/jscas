@@ -111,7 +111,8 @@ CAS.Symbol = function(symbol, bp, nud, led) {
     }
     CAS.Token.call(this, regex, bp, nud, led);
 }
-CAS.Symbol.prototype = Object.create(CAS.Token.prototype);
+CAS.Symbol.prototype = new CAS.Token();
+CAS.Symbol.prototype.constructor = CAS.Symbol;
 
 return CAS;
 })(window.CAS || {});
