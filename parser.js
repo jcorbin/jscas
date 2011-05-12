@@ -80,7 +80,8 @@ CAS.Parser.prototype = {
 };
 
 CAS.Token = function(regex, bp, nud, led) {
-    this.regex = regex;
+    if (regex != undefined)
+        this.regex = regex;
     if (bp && bp > this.bp) this.bp = bp;
     if (nud) this.nud = nud;
     if (led) this.led = led;
