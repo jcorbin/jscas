@@ -104,10 +104,12 @@ var regex_escape = function(text) {
 }.bind(/[-[\]{}()*+?.,\\^$|#\s]/g);
 
 CAS.Symbol = function(symbol, bp, nud, led) {
-    this.symbol = symbol;
-    CAS.Token.call(this,
-        new RegExp("^\\s*(" + regex_escape(symbol) + ")"),
-        bp, nud, led);
+    var regex = undefined;
+    if (symbol != undefined) {
+        this.symbol = symbol;
+        regex = new RegExp("^\\s*(" + regex_escape(symbol) + ")");
+    }
+    CAS.Token.call(this, regex, bp, nud, led);
 }
 CAS.Symbol.prototype = Object.create(CAS.Token.prototype);
 
