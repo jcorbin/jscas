@@ -58,10 +58,10 @@ CAS.Parser.prototype.recognize = function(recognizer) {
     return token;
 };
 CAS.Parser.prototype.advance = function(expected) {
-    this.token = this.recognize();
+    var token = this.token = this.recognize();
     if (expected != undefined && token.value != expected)
         token.error("unexpected token, expecting " + expected);
-    return this.token;
+    return token;
 };
 CAS.Parser.prototype.take = function(expected) {
     var taken = this.token || this.recognize();
